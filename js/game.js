@@ -3,7 +3,7 @@
 class Game
 {
     _engine; _renderer; _loader; _graphics; _input; _scene; _nextScene;
-    _titleScene; _actionScene;
+    _titleScene; _actionScene; _current_room; _active_item; _player;
     _zone;
 
     constructor() {
@@ -38,7 +38,34 @@ class Game
             get: () => {
                 return this._zone;
             }
-        })
+        });
+
+        Object.defineProperty(this, 'player', {
+            get: () => {
+                return this._player;
+            },
+            set: (value) => {
+                this._player = value;
+            }
+        });
+
+        Object.defineProperty(this, 'room', {
+            get: () => {
+                return this._current_room;
+            },
+            set: (value) => {
+                this._current_room = value;
+            }
+        });
+
+        Object.defineProperty(this, 'active_item', {
+            get: () => {
+                return this._active_item;
+            },
+            set: (value) => {
+                this._active_item = value;
+            }
+        });
     };
 
     ready = () => {

@@ -3,6 +3,7 @@
 class Hud {
     // private
     #game;
+    #player;
     #graphics;
     #input;
     #human;
@@ -24,6 +25,8 @@ class Hud {
     #command_cursor;
     #selected_command;
     #item_cursor;
+    #morph_cursor;
+    #morph_cursor_pos;
     #selected_item;
     #active_item;
     #item_slot;
@@ -33,6 +36,7 @@ class Hud {
         this.#game = game;
         this.#graphics = this.#game.graphics;
         this.#input = this.#game.input;
+        this.#player = this.#game.player;
 
         this.#hud = new Sprite(this.#graphics, 144, 432, 320, 64);
         this.#font = new Font(this.#game);
@@ -62,9 +66,11 @@ class Hud {
         this.#command_cursor = 0;
         this.#selected_command = -1;
         this.#item_cursor = -1;
+        this.#morph_cursor = -1;
         this.#selected_item = -1;
         this.#active_item = -1;
 
+        this.#morph_cursor_pos = [120, 152, 184, 208]
         this.#item_slot = [];
 
         Object.defineProperty(this, 'open', {
@@ -81,6 +87,7 @@ class Hud {
         this.#hud_open = true;
         this.#selected_command = -1;
         this.#item_cursor = -1;
+        this.#morph_cursor = -1;
     }
 
     update = (dt) => {
@@ -103,43 +110,72 @@ class Hud {
                     }
                 } else if (this.#input.isPressed(Input.KEY_SPACE)) {
                     this.#selected_command = this.#command_cursor;
-                    this.#item_cursor = 0;
+                    switch (this.#selected_command) {
+                        case Hud.COMMAND_TAKE: // Take
+                        case Hud.COMMAND_DROP: // Drop
+                        case Hud.COMMAND_GIVE: // Give
+                        case Hud.COMMAND_USE: // Use
+                            this.#item_cursor = 0;
+                            break;
+                        case Hud.COMMAND_MORPH: // Morph
+                            this.#morph_cursor = 0;
+                            break;
+                        case Hud.COMMAND_GIVEUP: // Give up
+                            console.log('** GIVE UP!!');
+                            this.#hud_open = false;
+                            break;
+                    }
                 }
             } else {
-                // select item
                 if (this.#input.isPressed(Input.KEY_LEFT)) {
                     if (this.#item_cursor > 0) {
                         this.#item_cursor--;
                     }
+                    if (this.#morph_cursor > 0) {
+                        this.#morph_cursor--;
+                    }
                 } else if (this.#input.isPressed(Input.KEY_RIGHT)) {
-                    if (this.#item_cursor < 4) {
+                    if (this.#item_cursor >= 0 && this.#item_cursor < 4) {
                         this.#item_cursor++;
+                    }
+                    if (this.#morph_cursor >= 0 && this.#morph_cursor < 3) {
+                        this.#morph_cursor++;
                     }
                 } else if (this.#input.isPressed(Input.KEY_SPACE)) {
 
-                    if (this.#selected_item == -1) {
-                        this.#selected_item = this.#item_cursor;
-
-                        switch (this.#selected_command) {
-                            case Hud.COMMAND_TAKE: // Take
-                                break;
-                            case Hud.COMMAND_DROP: // Drop
-                                break;
-                            case Hud.COMMAND_GIVE: // Give
-                                break;
-                            case Hud.COMMAND_USE: // Use
-                                this.#active_item = this.#selected_item;
-                                break;
-                            case Hud.COMMAND_MORPH: // Morph
-                                break;
-                            case Hud.COMMAND_GIVEUP: // Give up
-                                break;
-                        }
-                    } else {
-                        // take, drop, etc.
-                        // "close" hud
-                        this.#hud_open = false;
+                    // execute command
+                    switch (this.#selected_command) {
+                        case Hud.COMMAND_TAKE: // Take
+                            break;
+                        case Hud.COMMAND_DROP: // Drop
+                            break;
+                        case Hud.COMMAND_GIVE: // Give
+                            break;
+                        case Hud.COMMAND_USE: // Use
+                            this.#active_item = this.#item_cursor;
+                            break;
+                        case Hud.COMMAND_MORPH: // Morph
+                            switch (this.#morph_cursor) {
+                                case 0: // Human
+                                    this.#game.player.transform_to(Player.HUMAN);
+                                    break;
+                                case 1: // Fish
+                                    this.#game.player.transform_to(Player.FISH);
+                                    break;
+                                case 2: // Snowflake
+                                    this.#game.player.transform_to(Player.SNOWFLAKE);
+                                    break;
+                                case 3: // Bird
+                                    this.#game.player.transform_to(Player.BIRD);
+                                    break;
+                            }
+                            break;
+                        case Hud.COMMAND_GIVEUP: // Give up
+                            break;
                     }
+
+                    // close hud after when command is executed
+                    this.#hud_open = false;
                 }
             }
         }
@@ -187,6 +223,10 @@ class Hud {
 
             if (this.#item_cursor >= 0) {
                 this.#font.print(ctx, 240 + this.#item_cursor * 16, 200 - 64 + 56, '^');
+            }
+
+            if (this.#morph_cursor >= 0) {
+                this.#font.print(ctx, this.#morph_cursor_pos[this.#morph_cursor], 200 - 64 + 56 - 8, '^');
             }
         }
 

@@ -276,6 +276,6 @@ class Sprite
     }
 
     draw = (ctx, x, y) => {
-        ctx.drawImage(this._image, this._ix, this._iy, this._w, this._h, ~~(x + 0.5), ~~(y + 0.5), this._w, this._h);
+        ctx.drawImage(this._image, this._ix, this._iy, this._w, this._h, x, y, this._w, this._h);
     };
 }

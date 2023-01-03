@@ -51,7 +51,7 @@ class Zone {
         return z;
     }
 
-    draw = (ctx) => {
+    debug = (ctx) => {
         ctx.strokeStyle = 'red';
         ctx.lineWidth = 1;
         this.#zones.forEach(zone => {

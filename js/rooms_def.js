@@ -58,14 +58,13 @@ const Rooms = [
     {
         back: 'air',
         floor: 'ground',
-        details: [],
+        details: [
+            {
+                x: 48, y: 72,
+                obj: 'ladder_head' // This should be only visible when we put ladder into the room (18) below 
+            }
+        ],
         items: []
-        // details: [
-        //     {
-        //         x: 48, y: 72,
-        //         obj: 'ladder' // This should be only visible when we put ladder into the room (18) below 
-        //     }
-        // ]
     },
     // room 7
     {
@@ -81,7 +80,7 @@ const Rooms = [
         details: [
             {
                 x: 48, y: 72,
-                obj: 'ladder'
+                obj: 'ladder_head'
             }
         ],
         items: []
@@ -169,6 +168,10 @@ const Rooms = [
             {
                 x: 0, y: 120,
                 obj: 'waterfront_left'
+            },
+            {
+                x: 16, y: 120 + 16,
+                obj: 'ground'
             }
         ],
         items: []
@@ -197,7 +200,7 @@ const Rooms = [
                 obj: 'waterfront_right'
             },
             {
-                x: 304 - 16, y: 120 + 24,
+                x: 304 - 16, y: 120 + 16,
                 obj: 'ground'
             }
         ],
@@ -272,10 +275,6 @@ const Rooms = [
         back: 'air',
         floor: 'ground',
         details: [
-            {
-                x: 48, y: 72 - 16,
-                obj: 'ladder'
-            },
             {
                 x: 48, y: 0,
                 obj: 'ladder'
@@ -397,7 +396,7 @@ const Rooms = [
             },
             {
                 x: 48, y: 72,
-                obj: 'ladder'
+                obj: 'ladder_head'
             },
             {
                 x: 96, y: 72 - 8,
@@ -446,10 +445,6 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
-            },
-            {
-                x: 48, y: 72 - 16,
-                obj: 'ladder'
             },
             {
                 x: 48, y: 0,
@@ -505,7 +500,7 @@ const Rooms = [
             },
             {
                 x: 48, y: 72,
-                obj: 'ladder'
+                obj: 'ladder_head'
             }
         ],
         items: []
@@ -513,7 +508,7 @@ const Rooms = [
     // room 34
     {
         back: 'cave',
-        floor: 'rock',
+        floor: 'water',
         details: [
             {
                 x: 0, y: 0,
@@ -530,9 +525,76 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
+            },
+            {
+                x: 0*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 1*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 2*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 3*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 4*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 5*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 6*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-0*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-1*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-2*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-3*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-4*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-5*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 6*16-8+16, y: 200-64,
+                obj: 'ground'
+            },
+            {
+                x: 320-16-6*16-8, y: 200-64,
+                obj: 'ground'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 320 - 48, y: 104,
+                house: 'none',
+                visible: true,
+                name: 'blue_key'
+            }
+        ]
     },
     // room 35
     {
@@ -558,9 +620,28 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
+            },
+            {
+                x: 320 - 24 - 16*1, y: 200-64-16,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*2, y:  200-64-16,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*3, y: 200-64-16,
+                obj: 'cave'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 24 + 48, y: 104,
+                house: 'none',
+                visible: true,
+                name: 'yellow_key'
+            }
+        ]
     },
     // room 36 (fake)
     {
@@ -680,10 +761,6 @@ const Rooms = [
                 obj: 'torch'
             },
             {
-                x: 48, y: 72 - 16,
-                obj: 'ladder'
-            },
-            {
                 x: 48, y: 0,
                 obj: 'ladder'
             },
@@ -764,7 +841,14 @@ const Rooms = [
                 obj: 'torch'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 24 + 48, y: 104,
+                house: 'none',
+                visible: true,
+                name: 'purple_key'
+            }
+        ]
     },
     // room 45 (dark)
     {
@@ -774,10 +858,6 @@ const Rooms = [
             {
                 x: 0, y: 0,
                 obj: 'cave_top'
-            },
-            {
-                x: 48, y: 72 - 16,
-                obj: 'ladder'
             },
             {
                 x: 48, y: 0,
@@ -802,6 +882,34 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
+            },
+            {
+                x: 104+0*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+1*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+2*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+3*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+4*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+5*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+6*16, y: 200-64-16,
+                obj: 'lava'
             }
         ],
         items: []
@@ -830,9 +938,40 @@ const Rooms = [
             {
                 x: 16, y: 56,
                 obj: 'small_brown1_house'
+            },
+            {
+                x: 320 - 24 - 16*1, y: 0,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*1, y: 16,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*2, y: 0,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*2, y: 16,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*3, y: 0,
+                obj: 'cave'
+            },
+            {
+                x: 320 - 24 - 16*3, y: 16,
+                obj: 'cave'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 32 + 16 - 16, y: 200-64-16-16,
+                house: 'small_brown1_house',
+                visible: true,
+                name: 'granate'
+            }
+        ]
     },
     // room 48
     {
@@ -854,6 +993,34 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
+            },
+            {
+                x: 104+0*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+1*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+2*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+3*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+4*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+5*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+6*16, y: 200-64-16,
+                obj: 'lava'
             }
         ],
         items: []
@@ -913,7 +1080,7 @@ const Rooms = [
             },
             {
                 x: 48, y: 72,
-                obj: 'ladder'
+                obj: 'ladder_head'
             }
         ],
         items: []
@@ -921,7 +1088,7 @@ const Rooms = [
     // room 52
     {
         back: 'cave',
-        floor: 'rock',
+        floor: 'water',
         details: [
             {
                 x: 0, y: 0,
@@ -942,6 +1109,66 @@ const Rooms = [
             {
                 x: 320 - 40 - 8, y: 200 - 64 - 16 - 48,
                 obj: 'princess'
+            },
+            {
+                x: 0*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 1*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 2*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 3*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 4*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 5*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 6*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-0*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-1*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-2*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-3*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-4*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 320-16-5*16-8, y: 200-64-16,
+                obj: 'rock'
+            },
+            {
+                x: 6*16-8+16, y: 200-64,
+                obj: 'ground'
+            },
+            {
+                x: 320-16-6*16-8, y: 200-64,
+                obj: 'ground'
             }
         ],
         items: []
@@ -980,7 +1207,7 @@ const Rooms = [
             },
             {
                 x: 48, y: 72,
-                obj: 'ladder'
+                obj: 'ladder_head'
             }
         ],
         items: []
@@ -1025,6 +1252,18 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
+            },
+            {
+                x: 320-16*1, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 320-16*2, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 320-16*3, y: 200-64-16,
+                obj: 'lava'
             }
         ],
         items: []
@@ -1041,6 +1280,14 @@ const Rooms = [
             {
                 x: 0, y: 0,
                 obj: 'cave_left'
+            },
+            {
+                x: 0, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 16, y: 200-64-16,
+                obj: 'lava'
             }
         ],
         items: []
@@ -1053,6 +1300,62 @@ const Rooms = [
             {
                 x: 0, y: 0,
                 obj: 'cave_top'
+            },
+            {
+                x: 104+0*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+1*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+2*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+3*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+4*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+5*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+6*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+0*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+1*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+2*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+3*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+4*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+5*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+6*16, y: 16,
+                obj: 'lava'
             }
         ],
         items: []
@@ -1089,6 +1392,74 @@ const Rooms = [
             {
                 x: 0, y: 0,
                 obj: 'cave_left'
+            },
+            {
+                x: 320-16*1, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 320-16*2, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 320-16*3, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 104+0*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+1*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+2*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+3*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+4*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+5*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+6*16, y: 0,
+                obj: 'lava'
+            },
+            {
+                x: 104+0*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+1*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+2*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+3*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+4*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+5*16, y: 16,
+                obj: 'lava'
+            },
+            {
+                x: 104+6*16, y: 16,
+                obj: 'lava'
             }
         ],
         items: []
@@ -1121,6 +1492,22 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
+            },
+            {
+                x: 0*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 1*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 2*16, y: 200-64-16,
+                obj: 'lava'
+            },
+            {
+                x: 2*16, y: 200-64,
+                obj: 'ground'
             }
         ],
         items: []
@@ -1151,7 +1538,14 @@ const Rooms = [
                 obj: 'torch'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 120 + 16 + 32 + 16, y: 200-64-16-16,
+                house: 'green_house',
+                visible: true,
+                name: 'granate'
+            }
+        ]
     },
     // room 63
     {
@@ -1169,10 +1563,6 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
-            },
-            {
-                x: 48, y: 72 - 16,
-                obj: 'ladder'
             },
             {
                 x: 48, y: 0,
@@ -1245,10 +1635,6 @@ const Rooms = [
             {
                 x: 256 - 40, y: 72 - 8,
                 obj: 'torch'
-            },
-            {
-                x: 48, y: 72 - 16,
-                obj: 'ladder'
             },
             {
                 x: 48, y: 0,
