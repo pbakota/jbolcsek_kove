@@ -405,43 +405,39 @@ class Player {
     };
 
     fish_form_update = (dt) => {
+        var back = this._game.rooms.get(this._game.room).back;
         var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 32, h: 16 });
-        if (!(zones.includes('water') || (this._game.room >= 25 && this._game.room <= 28)) || (this._game.room >= 37 && this._game.room <= 40)) {
+        if (!(zones.includes('water') || back == 'water')) {
             return;
         }
         if (this._input.isDown(Input.KEY_LEFT)) {
-            if (this._face != Player.FACE_LEFT) {
-                this._face = Player.FACE_LEFT;
-            }
+            this._face = Player.FACE_LEFT;
             var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 8, h: 16 });
             if (!(zones.includes('wall') || zones.includes('rock') || zones.includes('waterfront'))) {
                 this._x -= dt * 100;
             }
         } else if (this._input.isDown(Input.KEY_RIGHT)) {
-            if (this._face != Player.FACE_RIGHT) {
-                this._face = Player.FACE_RIGHT;
-            }
+            this._face = Player.FACE_RIGHT;
             var zones = this._game.zone.hit_multi({ x: this._x + 32, y: this._y, w: 8, h: 16 });
             if (!(zones.includes('wall') || zones.includes('rock') || zones.includes('waterfront'))) {
                 this._x += dt * 100;
             }
         } else if (this._input.isDown(Input.KEY_UP)) {
-            if (!(this._game.room >= 13 && this._game.room <= 16) && !(this._game.room == 34 || this._game.room == 52)) {
+            var zones = this._game.zone.hit_multi({ x: this._x, y: this._y - 16, w: 32, h: 16 });
+            if (!(zones.includes('wall') || zones.includes('rock')) && (zones.includes('water') || back == 'water')) {
                 this._y -= dt * 100;
             }
         } else if (this._input.isDown(Input.KEY_DOWN)) {
-            if (!(this._game.room == 34 || this._game.room == 52)) {
-                var zones = this._game.zone.hit_multi({ x: this._x, y: this._y + 8 + 2, w: 16, h: 8 });
-                if (!zones.includes('rock')) {
-                    this._y += dt * 100;
-                }
+            var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 32, h: 16+1 });
+            if (!(zones.includes('wall') || zones.includes('rock')) && (zones.includes('water') || back == 'water')) {
+                this._y += dt * 100;
             }
         }
     };
 
     snowflake_form_update = (dt) => {
-        var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 16, h: 16 });
         var back = this._game.rooms.get(this._game.room).back;
+        var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 16, h: 16 });
         if (!(zones.includes('lava') || back == 'lava')) {
             return;
         }
@@ -463,7 +459,6 @@ class Player {
                 this._y -= dt * 100;
             }
         } else if (this._input.isDown(Input.KEY_DOWN)) {
-            console.log(zones);
             var zones = this._game.zone.hit_multi({ x: this._x, y: this._y + 16, w: 16, h: 4 });
             if (!(zones.includes('wall') || zones.includes('rock')) && (zones.includes('lava') || back == 'lava' || this._y + 16 >= 200 - 64)) {
                 this._y += dt * 100;
