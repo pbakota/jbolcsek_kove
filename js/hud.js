@@ -101,6 +101,12 @@ class Hud {
                 this.#hud_open = value;
             }
         })
+
+        Object.defineProperty(this, 'active_item', {
+            get: () => {
+                return this.#item_slot[this.#active_item];
+            }
+        })
     }
 
     open_hud = () => {

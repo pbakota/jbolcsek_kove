@@ -12,8 +12,6 @@ class ActionScene extends Scene {
         this._font = new Font(this.game);
         this._room = new Room(this.game);
 
-        this._game.room = 17; // start in this room
-        // this._game.room = 61; // start in this room
         this._player = new Player(this.game);
 
         // dirty hack again
@@ -24,6 +22,15 @@ class ActionScene extends Scene {
         this._hud_open = false; // when hud has control
 
         this._hud = new Hud(this.game);
+        this.game.hud = this._hud;
+
+        // this._game.room = 17; // start in this room
+        this._game.room = 9; // start in this room
+        // this._player.x = 148;
+        // this._player.x = 32;
+        this._player.x = 300;
+        this._player.y = 200-64-16-40;
+
     }
 
     drawRoom = (ctx) => {
@@ -115,31 +122,21 @@ class ActionScene extends Scene {
                 // left
                 this.#change_room(this._game.room - 1);
                 this._player.x = 320 - this._player.width;
-                if (this._player.kind == Player.SNOWFLAKE) {
-                    this._player.y = 200 - 64 - 16;
-                }
             } else if (this._player.x > 320 - 8) {
                 // right
                 this.#change_room(this._game.room + 1);
                 this._player.x = 0;
-            } else if (this._player.y < -32) {
+            } else if (this._player.y + (this._player.height >> 1) < 0) {
                 // up
                 this.#change_room(this._game.room - 12);
                 this._player.y = 200 - 64 - 16;
             } else if (this._player.y > 200 - 64) {
                 // down
                 if (this._game.room + 12 >= 72) {
-                    console.log('Out of mapr');
+                    console.log('Out of map');
                 } else {
-                    if (this._game.room != 6) {
-                        // in room 6 there is a ladder head but in below room there is no ladder until we cut off the tree and put the ladder
-                        this.#change_room(this._game.room + 12);
-                        if (this._player.kind == Player.SNOWFLAKE) {
-                            this._player.y = -8;
-                        } else {
-                            this._player.y = -24;
-                        }
-                    }
+                    this.#change_room(this._game.room + 12);
+                    this._player.y = -8;
                 }
             }
         }
@@ -152,6 +149,7 @@ class ActionScene extends Scene {
         if (this._initial) {
             this._font.print(ctx, ~~((320 - 14 * 8) / 2), 8, 'STONE OF SAGES');
             this._font.print(ctx, ~~((320 - 36 * 8) / 2), 16 + 8, 'ORIGINAL PLUS/4 GAME BY MIKLOS TIHOR');
+            this._font.print(ctx, ~~((320 - 31 * 8) / 2), 16 + 24, 'JAVASCRIPT PORT BY PETER BAKOTA');
 
             this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO START');
         } else {
