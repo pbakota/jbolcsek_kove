@@ -9,7 +9,6 @@ class ActionScene extends Scene {
         this._graphics = this.game.graphics;
         this._input = this.game.input;
 
-        this._hud = new Hud(this.game);
         this._font = new Font(this.game);
         this._room = new Room(this.game);
 
@@ -19,9 +18,12 @@ class ActionScene extends Scene {
 
         // dirty hack again
         this._game.player = this._player;
+        this._game.rooms = this._room;
 
         this._initial = true;
         this._hud_open = false; // when hud has control
+
+        this._hud = new Hud(this.game);
     }
 
     drawRoom = (ctx) => {
@@ -53,6 +55,11 @@ class ActionScene extends Scene {
                 // Toggle 'door'
                 const door = zones.find(value => /door$/.test(value));
                 this._room.opened[door] = !this._room.opened[door];
+                if (this._room.opened[door]) {
+                    this._game.house = door.slice(0, -5);
+                } else {
+                    this._game.house = 'none';
+                }
             }
         } else if (this._input.isDown(Input.KEY_SPACE) && this._input.isPressed(Input.KEY_DOWN)) {
             this._hud.open_hud();

@@ -117,8 +117,9 @@ class Renderer
         this._background = background;
     };
 
-    updateDelta = () => {
-        this._now = window.performance.now();
+    updateDelta = (timestamp) => {
+        // this._now = window.performance.now();
+        this._now = timestamp;
         this._delta = (this._now - this._then) / 1000;
         if (this._delta > 1.0) this._delta = 1.0;
         this._then = this._now;
@@ -167,9 +168,9 @@ class Engine
         }
     };
 
-    loop = () => {
+    loop = (timestamp) => {
         this._reqframe = window.requestAnimationFrame(this.loop);
-        this._renderer.updateDelta();
+        this._renderer.updateDelta(timestamp);
 
         this.update();
         this.draw();
@@ -178,7 +179,7 @@ class Engine
     run = () => {
         if (this._running) return;
         this._running = true;
-        this._renderer.resetDelta();
+        // this._renderer.resetDelta();
 
         if (this._paused) {
             this._paused = false;

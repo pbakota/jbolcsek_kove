@@ -152,6 +152,12 @@ class Room {
         this.#water_7
         ];
 
+        Object.defineProperty(this, 'items', {
+            get: () => {
+                return this.#items;
+            }
+        });
+
         Object.defineProperty(this, 'opened', {
             get: () => { return this.#opened }
         })

@@ -63,6 +63,12 @@ class Player {
             }
         })
 
+        Object.defineProperty(this, 'face', {
+            get: () => {
+                return this._face;
+            }
+        })
+
         Object.defineProperty(this, 'width', {
             get: () => {
                 switch (this._kind) {
@@ -87,8 +93,8 @@ class Player {
 
         this._fall_anim = 0;
         this._bird_speed = 0;
-        // this._x = 148;
-        this._x = 32;
+        this._x = 148;
+        // this._x = 32;
         this._y = 80;
         this._falling = false;
         this._height_counter = 0;
@@ -481,7 +487,8 @@ class Player {
         ctx.strokeStyle = 'yellow';
         ctx.beginPath();
         // ctx.rect(this._x, this._y+40, 16, 8);
-        ctx.rect(this._x, this._y, 16, 16);
+        const r = { x: this._x+4, y: this._y + 40 - 16, w: 16, h: 16 };
+        ctx.rect(r.x, r.y, r.w, r.h);
         ctx.stroke();
     }
 

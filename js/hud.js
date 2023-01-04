@@ -30,6 +30,7 @@ class Hud {
     #selected_item;
     #active_item;
     #item_slot;
+    #all_pickable_items;
 
     // ctor
     constructor(game) {
@@ -71,7 +72,26 @@ class Hud {
         this.#active_item = -1;
 
         this.#morph_cursor_pos = [120, 152, 184, 208]
-        this.#item_slot = [];
+        this.#item_slot = [
+            'empty','empty','empty','empty','empty'
+        ];
+
+        this.#all_pickable_items = [
+            'brown_key',
+            'grey_key',
+            'yellow_key',
+            'blue_key',
+            'purple_key',
+            'green_key',
+            'flower',
+            'granate',
+            'ladder',
+            'pistol',
+            'axe',
+            'spade',
+            'lamp',
+            'cross',
+        ];
 
         Object.defineProperty(this, 'open', {
             get: () => {
@@ -146,13 +166,24 @@ class Hud {
                     // execute command
                     switch (this.#selected_command) {
                         case Hud.COMMAND_TAKE: // Take
+                            if (this.#item_slot[this.#item_cursor] == 'empty' && this.#game.player.kind == Player.HUMAN) {
+                                this.#take_item(this.#item_cursor);
+                            }
                             break;
                         case Hud.COMMAND_DROP: // Drop
+                            if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
+                                this.#drop_item(this.#item_cursor);
+                            }
                             break;
                         case Hud.COMMAND_GIVE: // Give
+                            if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
+                                this.#give_item(this.#item_cursor);
+                            }
                             break;
                         case Hud.COMMAND_USE: // Use
-                            this.#active_item = this.#item_cursor;
+                            if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
+                                this.#use_item(this.#item_cursor);
+                            }
                             break;
                         case Hud.COMMAND_MORPH: // Morph
                             switch (this.#morph_cursor) {
@@ -186,6 +217,56 @@ class Hud {
             this.#anim_speed = 0;
             this.#anim_count = (this.#anim_count + 1) % 4;
         }
+    }
+
+    #take_item = (slot) => {
+        if (this.#game.player.face == Player.FACE_LEFT) {
+            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x-4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
+            if (this.#all_pickable_items.includes(item.name)) {
+                this.#item_slot[slot] = item.name;
+                this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
+            }
+        } else if (this.#game.player.face == Player.FACE_RIGHT) {
+            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x+4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
+            if (this.#all_pickable_items.includes(item.name)) {
+                this.#item_slot[slot] = item.name;
+                this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
+            }
+        }
+    }
+
+    #drop_item = (slot) => {
+        if (this.#game.player.face == Player.FACE_LEFT) {
+            const item = {
+                x: this.#game.player.x+4, y: this.#player.y + 40 - 16,
+                name: this.#item_slot[slot],
+                visible: true,
+                house: this.#game.house,
+            };
+            this.#item_slot[slot] = 'empty';
+            this.#game.rooms.items.add_item_to_room(this.#game.room, item);
+        } else if (this.#game.player.face == Player.FACE_RIGHT) {
+            const item = {
+                x: this.#game.player.x+4, y: this.#player.y + 40-16,
+                name: this.#item_slot[slot],
+                visible: true,
+                house: this.#game.house,
+            };
+            this.#item_slot[slot] = 'empty';
+            this.#game.rooms.items.add_item_to_room(this.#game.room, item);
+        }
+    }
+
+    #give_item = (slot) => {
+        if (this.#game.player.face == Player.FACE_LEFT) {
+
+        } else if (this.#game.player.face == Player.FACE_RIGHT) {
+
+        }
+    }
+
+    #use_item = (slot) => {
+        this.#active_item = slot;
     }
 
     can_be = (kind) => {
@@ -244,6 +325,13 @@ class Hud {
 
         if (this.#can_be_bird)
             this.#bird_anim[this.#anim_count].draw(ctx, 208, 200 - 64 + 8);
+
+        for (var i in this.#item_slot) {
+            var it = this.#item_slot[i];
+            if (it != 'empty') {
+                this.#game.rooms.items.draw_item(ctx, it, 240 + i * 16, 200-64 + 32);
+            }
+        }
     }
 }
 
