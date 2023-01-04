@@ -24,11 +24,11 @@ class ActionScene extends Scene {
         this._hud = new Hud(this.game);
         this.game.hud = this._hud;
 
-        // this._game.room = 17; // start in this room
-        this._game.room = 9; // start in this room
-        // this._player.x = 148;
+        this._game.room = 17; // start in this room
+        // this._game.room = 9; // start in this room
+        this._player.x = 148;
         // this._player.x = 32;
-        this._player.x = 300;
+        // this._player.x = 300;
         this._player.y = 200-64-16-40;
 
     }
@@ -61,8 +61,8 @@ class ActionScene extends Scene {
             {
                 // Toggle 'door'
                 const door = zones.find(value => /door$/.test(value));
-                this._room.opened[door] = !this._room.opened[door];
-                if (this._room.opened[door]) {
+                this._room.flags[door] = !this._room.flags[door];
+                if (this._room.flags[door]) {
                     this._game.house = door.slice(0, -5);
                 } else {
                     this._game.house = 'none';

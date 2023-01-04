@@ -216,7 +216,7 @@ const Rooms = [
                 obj: 'green_house'
             },
             {
-                x: 32, y: 8,
+                x: 32-8, y: 8,
                 obj: 'tree'
             }
         ],

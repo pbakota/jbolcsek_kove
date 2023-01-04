@@ -16,7 +16,9 @@ class Mob
     #delay;
     #x;
     #y;
+    #vx;
     #visible;
+    #visible_delay;
 
     // ctor
     constructor(game) {
@@ -35,9 +37,7 @@ class Mob
         this.#mob_timer = 0;
         this.#visible = false;
         this.#delay = 0;
-
-        this.#x = 160-4;
-        this.#y = 200-64-16-40+8;
+        this.#visible_delay = 0.02 + Math.random() * 0.4;
 
         Object.defineProperty(this, 'x', {
             get: () => { return this.#x; }
@@ -47,24 +47,43 @@ class Mob
         })
     }
 
+    // (a)xis (a)ligned (b)ounding (b)ox
+    #aabb = (rect1, rect2) => {
+        return (
+            rect1.x < rect2.x + rect2.w &&
+            rect1.x + rect1.w > rect2.x &&
+            rect1.y < rect2.y + rect2.h &&
+            rect1.h + rect1.y > rect2.y
+        );
+    }
+
     update = (dt) => {
         this.#mob_timer += dt;
-        if(this.#mob_timer >= 1.0 && this.#mob_timer < 1.5) {
+        if (this.#mob_timer < this.#visible_delay) {
+            if (this.#player.x <= 320 / 4 || this.#player.x >= 320 - (320 / 4)) {
+                // The player is on the screen side
+                this.#x = 160 + (Math.random() * 80) - 40;
+            } else {
+                if (this.#player.x < 160) {
+                    this.#x = 320 - (Math.random() * 80);
+                } else {
+                    this.#x = Math.random() * 80;
+                }
+            }
+            this.#y = 200 - 64 - 16 - 40 + 8;
+            this.#vx = (this.#player.x < this.#x) ? -1 : 1;
+        } else if(this.#mob_timer >= this.#visible_delay && this.#mob_timer <= this.#visible_delay + 0.1) {
             this.#visible = true;
-        } else if(this.#mob_timer >=2.0 && this.#mob_timer <= 4.0) {
+        } else if (this.#mob_timer >= 0.5 && this.#mob_timer <= 1.0) {
             this.#delay += dt;
-            if(this.#delay > 0.12) {
+            if (this.#delay > 0.05) {
                 this.#delay = 0;
-                if(this.#mob_frame < 3)
+                if (this.#mob_frame < 3)
                     this.#mob_frame ++;
             }
-        }
-
-        if(this.#mob_frame == 3) {
-            if(this.#player.x < this.#x) {
-                this.#x += -200*dt;
-            } else if(this.#player.x > this.#x) {
-                this.#x += 200*dt;
+        } else if (this.#mob_timer >= 1.0) {
+            if (this.#mob_frame == 3) {
+                this.#x += this.#vx* 400 * dt;
             }
         }
     }
@@ -72,5 +91,9 @@ class Mob
     draw = (ctx) => {
         if(this.#visible)
             this.#mob_anim[this.#mob_frame].draw(ctx, ~~(this.#x + 0.5), ~~(this.#y + 0.5));
+    }
+
+    hit = (rect) => {
+        return (this.#aabb(rect, { x: this.#x, y: this.#y, w: 8, h: 8 }));
     }
 }

@@ -118,11 +118,11 @@ class Player {
         this._bullet_timer = 0;
     }
 
-    fire = () => {
-        if(this._bullet_fired) return;
+    use_pistol = () => {
+        if (this._bullet_fired) return;
 
         this._bullet_fired = true;
-        if(this._face == Player.FACE_USE_LEFT) {
+        if (this._face == Player.FACE_USE_LEFT) {
             // fire left
             this._bullet_x = this._x - 8;
             this._bullet_y = this._y + 8;
@@ -136,9 +136,33 @@ class Player {
         }
     }
 
+    use_axe = () => {
+        const check_rect = { x: this._face == Player.FACE_USE_RIGHT ? this._x + 16 : this._x - 16, y: this._y, w: 8, h: 40 };
+        if (this._game.room == 18) {
+            var zones = this._game.zone.hit_multi(check_rect);
+            if (zones.includes('tree')) {
+                this._game.rooms.flags['tree_cut'] = true;
+            }
+        } else if (this._game.room == 37) {
+            var zones = this._game.zone.hit_multi(check_rect);
+            if (zones.includes('alga_flower')) {
+                this._game.rooms.flags['flower_cut'] = true;
+            }
+        }
+    }
+
+    use_ladder = () => {
+        if (this._game.room == 18 && this._game.rooms.flags['tree_cut']) {
+            var zones = this._game.zone.hit_multi({ x: this._face == Player.FACE_USE_RIGHT ? this._x + 16 : this._x - 16, y: this._y, w: 8, h: 40 });
+            if (zones.includes('tree')) {
+                this._game.rooms.flags['ladder_put'] = true;
+            }
+        }
+    }
+
     transform_to = (kind) => {
         // ignore if already in that form
-        if(this._kind == kind)
+        if (this._kind == kind)
             return;
 
         // player cooridinates rounded to 8 pixel boundary
@@ -148,47 +172,47 @@ class Player {
         switch (kind) {
             case Player.HUMAN:
                 if (this._kind == Player.SNOWFLAKE) {
-                    if(this._face == Player.FACE_LEFT) {
-                        this._x = rx - 8-4;
-                        this._y = 200-64-16-40;
-                    } else if(this._face == Player.FACE_RIGHT) {
-                        this._x = rx + 8+4;
-                        this._y = 200-64-16-40;
+                    if (this._face == Player.FACE_LEFT) {
+                        this._x = rx - 8 - 4;
+                        this._y = 200 - 64 - 16 - 40;
+                    } else if (this._face == Player.FACE_RIGHT) {
+                        this._x = rx + 8 + 4;
+                        this._y = 200 - 64 - 16 - 40;
                     }
                 } else if (this._kind == Player.FISH) {
-                    if(this._game.room == 13) {
+                    if (this._game.room == 13) {
                         this._x = this._x - 4;
-                    } else if(this._game.room == 16) {
-                        this._x = this._x + 32-8;
-                    } else if(this._game.room == 34 || this._game.room == 52) {
-                        if(this._x<160) {
+                    } else if (this._game.room == 16) {
+                        this._x = this._x + 32 - 8;
+                    } else if (this._game.room == 34 || this._game.room == 52) {
+                        if (this._x < 160) {
                             this._x = this._x;
                         } else {
-                            this._x = this._x + 32-8;
+                            this._x = this._x + 32 - 8;
                         }
                     }
                     var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 32, h: 16 });
-                    this._y = (zones.includes('water') && (this._game.room == 16 || this._game.room == 13 || this._game.room == 34 || this._game.room == 52) ?  80 +  16 : 80);
-                } else if(this._kind == Player.BIRD) {
+                    this._y = (zones.includes('water') && (this._game.room == 16 || this._game.room == 13 || this._game.room == 34 || this._game.room == 52) ? 80 + 16 : 80);
+                } else if (this._kind == Player.BIRD) {
                     this._falling = true;
                 }
                 break;
             case Player.SNOWFLAKE:
-                if(this._face == Player.FACE_LEFT) {
+                if (this._face == Player.FACE_LEFT) {
                     this._x = rx - 16;
-                    this._y = 200-64-16;
+                    this._y = 200 - 64 - 16;
                     this._face = Player.FACE_RIGHT;
-                } else if(this._face == Player.FACE_RIGHT) {
+                } else if (this._face == Player.FACE_RIGHT) {
                     this._x = rx + 8;
-                    this._y = 200-64-16;
+                    this._y = 200 - 64 - 16;
                     this._face = Player.FACE_LEFT;
                 }
-                var zones = this._game.zone.hit_multi({x: this._x, y: this._y, w: 16, h: 16});
-                if(!zones.includes('lava')) {
-                    this._y = 200-64-16-16;
+                var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 16, h: 16 });
+                if (!zones.includes('lava')) {
+                    this._y = 200 - 64 - 16 - 16;
                     console.log('You have frozen!');
                 }
-            break;
+                break;
             case Player.FISH:
                 if (this._game.room == 13) {
                     this._x = 16;
@@ -198,12 +222,12 @@ class Player {
                     this._y = 120;
                 } else if (this._game.room == 34 || this._game.room == 52) {
                     this._x = this._x < 160 ? this._x : this._x - 24;
-                    this._y = this._y + 40 -16;
+                    this._y = this._y + 40 - 16;
                 } else {
                     this._y = this.y + 40 - 16;
                 }
                 var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 32, h: 16 });
-                if(!zones.includes('water')) {
+                if (!zones.includes('water')) {
                     console.log('You have drown!');
                 }
                 break;
@@ -213,10 +237,24 @@ class Player {
         this._anim_speed = 0;
     }
 
+    use_item = () => {
+        switch (this._game.hud.active_item) {
+            case 'pistol':
+                this.use_pistol();
+                break;
+            case 'axe':
+                this.use_axe();
+                break;
+            case 'ladder':
+                this.use_ladder();
+                break;
+        }
+    }
+
     human_form_update = (dt) => {
         // gravity
         if (this._face != Player.FACE_LADDER) {
-            var zones = this._game.zone.hit_multi({ x: this._x + 4, y: this._y + 40-1, w: 8, h: 8 });
+            var zones = this._game.zone.hit_multi({ x: this._x + 4, y: this._y + 40 - 1, w: 8, h: 8 });
             // console.log(zones);
             if (!(zones.includes('ground') || zones.includes('waterfront') || zones.includes('rock'))) {
                 this._fall_anim += dt;
@@ -231,7 +269,7 @@ class Player {
                         this._height_counter++;
                     }
                 }
-            } else if(this._falling) {
+            } else if (this._falling) {
                 this._falling = false;
                 this._y = (zones.includes('water') ? 80 + 16 : 80);
                 if (this._height_counter > 5) {
@@ -243,16 +281,12 @@ class Player {
         if (this._input.isDown(Input.KEY_SPACE)) {
             if (this._input.isPressed(Input.KEY_LEFT)) {
                 this._face = Player.FACE_USE_LEFT;
-                if(this._game.hud.active_item == 'pistol') {
-                    this.fire();
-                }
-
+                this.use_item();
             } else if (this._input.isPressed(Input.KEY_RIGHT)) {
                 this._face = Player.FACE_USE_RIGHT;
-                if(this._game.hud.active_item == 'pistol') {
-                    this.fire();
-                }
+                this.use_item();
             }
+
         } else {
             // Reset from use face
             if (this._face == Player.FACE_USE_LEFT) {
@@ -372,7 +406,7 @@ class Player {
 
     fish_form_update = (dt) => {
         var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 32, h: 16 });
-        if(!(zones.includes('water') || (this._game.room >= 25 && this._game.room <= 28)) || (this._game.room >= 37 && this._game.room <= 40)) {
+        if (!(zones.includes('water') || (this._game.room >= 25 && this._game.room <= 28)) || (this._game.room >= 37 && this._game.room <= 40)) {
             return;
         }
         if (this._input.isDown(Input.KEY_LEFT)) {
@@ -397,7 +431,7 @@ class Player {
             }
         } else if (this._input.isDown(Input.KEY_DOWN)) {
             if (!(this._game.room == 34 || this._game.room == 52)) {
-                var zones = this._game.zone.hit_multi({ x: this._x, y: this._y+8+2, w: 16, h: 8 });
+                var zones = this._game.zone.hit_multi({ x: this._x, y: this._y + 8 + 2, w: 16, h: 8 });
                 if (!zones.includes('rock')) {
                     this._y += dt * 100;
                 }
@@ -408,7 +442,7 @@ class Player {
     snowflake_form_update = (dt) => {
         var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 16, h: 16 });
         var back = this._game.rooms.get(this._game.room).back;
-        if(!(zones.includes('lava') || back == 'lava')) {
+        if (!(zones.includes('lava') || back == 'lava')) {
             return;
         }
         if (this._input.isDown(Input.KEY_LEFT)) {
@@ -424,14 +458,14 @@ class Player {
                 this._x += dt * 100;
             }
         } else if (this._input.isDown(Input.KEY_UP)) {
-            var zones = this._game.zone.hit_multi({ x: this._x, y: this._y-4, w: 16, h: 8 });
+            var zones = this._game.zone.hit_multi({ x: this._x, y: this._y - 4, w: 16, h: 8 });
             if (!(zones.includes('wall') || zones.includes('rock') || back == 'cave') && (zones.includes('lava') || back == 'lava')) {
                 this._y -= dt * 100;
             }
         } else if (this._input.isDown(Input.KEY_DOWN)) {
             console.log(zones);
             var zones = this._game.zone.hit_multi({ x: this._x, y: this._y + 16, w: 16, h: 4 });
-            if (!(zones.includes('wall') || zones.includes('rock')) && (zones.includes('lava') || back == 'lava' || this._y + 16 >= 200-64)) {
+            if (!(zones.includes('wall') || zones.includes('rock')) && (zones.includes('lava') || back == 'lava' || this._y + 16 >= 200 - 64)) {
                 this._y += dt * 100;
             }
         }
@@ -491,10 +525,18 @@ class Player {
                 break;
         }
 
-        if(this._bullet_fired) {
+        if (this._bullet_fired) {
             this._bullet_x += dt * this._bullet_vx * 100;
-            if(this._bullet_x < -8 || this._bullet_x > 320)
+            if (this._bullet_x < -8 || this._bullet_x > 320) {
                 this._bullet_fired = false;
+            }
+
+            if (this._bullet_fired) {
+                // check if mob was hit
+                if (this._game.rooms.mob) {
+                    this._game.rooms.mob_hit({ x: this._bullet_x, y: this._bullet_y, w: 8, h: 8 });
+                }
+            }
         }
     };
 
@@ -503,7 +545,7 @@ class Player {
         ctx.strokeStyle = 'yellow';
         ctx.beginPath();
         // ctx.rect(this._x, this._y+40, 16, 8);
-        const r = { x: (this._x + 4) & 0xfffffff8, y: this._y & 0xfffffff8, w: 8, h: 8 };
+        const r = { x: this._x + 16, y: this._y, w: 8, h: 40 };
         ctx.rect(r.x, r.y, r.w, r.h);
         ctx.stroke();
     }
@@ -524,7 +566,6 @@ class Player {
                 } else if (this._face == Player.FACE_USE_RIGHT) {
                     this._use_right.draw(ctx, ~~(this._x + 0.5), ~~(this._y + 0.5));
                 }
-                // this.debug(ctx);
                 break
             case Player.FISH:
                 if (this._face == Player.FACE_LEFT) {
@@ -545,7 +586,7 @@ class Player {
                 break
         }
 
-        if(this._bullet_fired) {
+        if (this._bullet_fired) {
             this._bullet.draw(ctx, this._bullet_x, this._bullet_y);
         }
     };
