@@ -429,7 +429,7 @@ class Player {
             }
         } else if (this._input.isDown(Input.KEY_DOWN)) {
             var zones = this._game.zone.hit_multi({ x: this._x, y: this._y, w: 32, h: 16+1 });
-            if (!(zones.includes('wall') || zones.includes('rock')) && (zones.includes('water') || back == 'water')) {
+            if (!(this._game.room == 34 || this._game.room == 52) && !(zones.includes('wall') || zones.includes('rock')) && (zones.includes('water') || back == 'water')) {
                 this._y += dt * 100;
             }
         }
