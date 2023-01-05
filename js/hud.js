@@ -18,6 +18,9 @@ class Hud {
     #can_be_snowflake;
     #can_be_fish;
     #can_be_bird;
+    #can_be_timer;
+    #can_be_alpha;
+    #can_be_kind;
     #bird_anim;
     #anim_speed;
     #anim_count;
@@ -93,6 +96,7 @@ class Hud {
             'spade',
             'lamp',
             'cross',
+            'the_stone'
         ];
 
         Object.defineProperty(this, 'open', {
@@ -113,6 +117,10 @@ class Hud {
         this.#message = '';
         this.#message_timer = 0;
         this.#message_count = 0;
+
+        this.#can_be_timer = 0;
+        this.#can_be_kind = -1;
+        this.#can_be_alpha = 0;
 
         // this.#item_slot[0] = 'flower';
         // this.#active_item = 0;
@@ -271,55 +279,56 @@ class Hud {
 
         this.animate_bird(dt);
         this.update_message(dt);
+
+        if (this.#can_be_kind != -1) {
+            this.#can_be_timer += dt;
+            if (this.#can_be_timer > 0.08) {
+                this.#can_be_timer = 0;
+                this.#can_be_alpha += 0.1;
+                if (this.#can_be_alpha > 1.0) {
+                    this.#can_be_kind = -1;
+                }
+            }
+        }
     }
 
     #take_item = (slot) => {
-        if (this.#game.player.face == Player.FACE_LEFT) {
-            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x - 4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
-            if (this.#all_pickable_items.includes(item.name)) {
-                this.#item_slot[slot] = item.name;
-                this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
-                this.#message = item.name;
-            }
-        } else if (this.#game.player.face == Player.FACE_RIGHT) {
-            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x + 4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
-            if (this.#all_pickable_items.includes(item.name)) {
-                this.#item_slot[slot] = item.name;
-                this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
+        var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house,
+            { x: ((this.#game.player.face == Player.FACE_LEFT) ? this.#player.x - 4 : this.#player.x + 4), y: this.#player.y + 40 - 16, w: 16, h: 16 });
+
+        if (this.#all_pickable_items.includes(item.name)) {
+            this.#item_slot[slot] = item.name;
+            this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
+            if (/_key$/.test(item.name)) {
+                this.#message = 'key';
+            } else {
                 this.#message = item.name;
             }
         }
     }
 
     #drop_item = (slot) => {
-        if (this.#game.player.face == Player.FACE_LEFT) {
-            const item = {
-                x: this.#game.player.x + 4, y: this.#player.y + 40 - 16,
-                name: this.#item_slot[slot],
-                visible: true,
-                house: this.#game.house,
-            };
-            this.#item_slot[slot] = 'empty';
-            this.#game.rooms.items.add_item_to_room(this.#game.room, item);
-        } else if (this.#game.player.face == Player.FACE_RIGHT) {
-            const item = {
-                x: this.#game.player.x + 4, y: this.#player.y + 40 - 16,
-                name: this.#item_slot[slot],
-                visible: true,
-                house: this.#game.house,
-            };
-            this.#item_slot[slot] = 'empty';
-            this.#game.rooms.items.add_item_to_room(this.#game.room, item);
+        const item = {
+            x: ~~(this.#game.player.x + 4 + 0.5), y: ~~(this.#player.y + 40 - 16 + 0.5),
+            name: this.#item_slot[slot],
+            visible: true,
+            house: this.#game.house,
+        };
+        if (this.#active_item == slot) {
+            this.#active_item = -1;
         }
+        this.#item_slot[slot] = 'empty';
+        this.#game.rooms.items.add_item_to_room(this.#game.room, item);
     }
 
     #give_flower = (slot) => {
         this.#game.hud.set_message('         thank you, I will give you something in return');
         this.#item_slot[slot] = 'empty';
+        this.#active_item = -1;
         var key = Rooms[52].items.find(e => e.name == 'green_key');
         key.visible = true;
     }
-    
+
     #give_item = (slot) => {
         if (this.#game.player.face == Player.FACE_LEFT) {
             if(this.#item_slot[slot] == 'flower') {
@@ -347,24 +356,32 @@ class Hud {
     remove_active_item = () => {
         if (this.#active_item != -1) {
             this.#item_slot[this.#active_item] = 'empty';
+            this.#active_item = -1;
         }
     }
 
     can_be = (kind) => {
         switch (kind) {
             case Player.HUMAN:
+                if (this.#can_be_human) return;
                 this.#can_be_human = true;
                 break;
             case Player.FISH:
+                if (this.#can_be_fish) return;
                 this.#can_be_fish = true;
                 break;
             case Player.SNOWFLAKE:
+                if (this.#can_be_snowflake) return;
                 this.#can_be_snowflake = true;
                 break;
             case Player.BIRD:
+                if (this.#can_be_bird) return;
                 this.#can_be_bird = true;
                 break;
         }
+        this.#can_be_timer = 0;
+        this.#can_be_alpha = 0;
+        this.#can_be_kind = kind;
     }
 
     draw = (ctx) => {
@@ -395,17 +412,49 @@ class Hud {
         if (this.#active_item >= 0)
             this.#font.print(ctx, 240 + this.#active_item * 16, 200 - 64 + 56 - 8, '^');
 
-        if (this.#can_be_human)
-            this.#human.draw(ctx, 120 - 4, 200 - 64 + 8);
+        if (this.#can_be_human) {
+            if (this.#can_be_kind == Player.HUMAN) {
+                ctx.save();
+                ctx.globalAlpha = this.#can_be_alpha;
+                this.#human.draw(ctx, 120 - 4, 200 - 64 + 8);
+                ctx.restore();
+            } else {
+                this.#human.draw(ctx, 120 - 4, 200 - 64 + 8);
+            }
+        }
 
-        if (this.#can_be_fish)
-            this.#fish.draw(ctx, 136, 200 - 64 + 32);
+        if (this.#can_be_fish) {
+            if (this.#can_be_kind == Player.FISH) {
+                ctx.save();
+                ctx.globalAlpha = this.#can_be_alpha;
+                this.#fish.draw(ctx, 136, 200 - 64 + 32);
+                ctx.restore();
+            } else {
+                this.#fish.draw(ctx, 136, 200 - 64 + 32);
+            }
+        }
 
-        if (this.#can_be_snowflake)
-            this.#snowflake.draw(ctx, 184, 200 - 64 + 32);
+        if (this.#can_be_snowflake) {
+            if (this.#can_be_kind == Player.SNOWFLAKE) {
+                ctx.save();
+                ctx.globalAlpha = this.#can_be_alpha;
+                this.#snowflake.draw(ctx, 184, 200 - 64 + 32);
+                ctx.restore();
+            } else {
+                this.#snowflake.draw(ctx, 184, 200 - 64 + 32);
+            }
+        }
 
-        if (this.#can_be_bird)
-            this.#bird_anim[this.#anim_count].draw(ctx, 208, 200 - 64 + 8);
+        if (this.#can_be_bird) {
+            if (this.#can_be_kind == Player.BIRD) {
+                ctx.save();
+                ctx.globalAlpha = this.#can_be_alpha;
+                this.#bird_anim[this.#anim_count].draw(ctx, 208, 200 - 64 + 8);
+                ctx.restore();
+            } else {
+                this.#bird_anim[this.#anim_count].draw(ctx, 208, 200 - 64 + 8);
+            }
+        }
 
         for (var i in this.#item_slot) {
             var it = this.#item_slot[i];

@@ -296,6 +296,12 @@ class Room {
     enter = (room) => {
         this.#animations = [];
         this.#first_draw = true;
+        // Here is a special case when we entered a small purple house which has ladder inside
+        if (room == 19 && this.#flags['small_purple_house_door']) {
+            this.#game.house = 'small_purple_house';
+        } else {
+            this.#game.house = 'none';
+        }
 
         if (this.#mob_rooms.includes(this.#game.room)) {
             this.#mob = new Mob(this.#game);

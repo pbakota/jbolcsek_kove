@@ -25,11 +25,11 @@ class ActionScene extends Scene {
         this.game.hud = this._hud;
 
         this._game.room = 17; // start in this room
-        // this._game.room = 52; // start in this room
+        // this._game.room = 38; // start in this room
         this._player.x = 148;
         // this._player.x = 200;
         // this._player.x = 300;
-        this._player.y = 200-64-16-40;
+        this._player.y = 200 - 64 - 16 - 40;
     }
 
     init = () => { };
@@ -53,18 +53,81 @@ class ActionScene extends Scene {
                 || zones.includes('small_brown2_house_door')
                 || zones.includes('green_hut_door')
                 || zones.includes('purple_hut_door')
-                || zones.includes('brown_hut_door')))
-            {
-                // Toggle 'door'
+                || zones.includes('brown_hut_door'))) {
+                // Toggle 'doors'
+
                 const door = zones.find(value => /door$/.test(value));
-                this._room.flags[door] = !this._room.flags[door];
+                // check locked doors
+                switch (this._game.room) {
+                    case 0:
+                        if (door == 'small_purple_house_door') {
+                            if (this._game.hud.active_item == 'yellow_key') {
+                                this._room.flags[door] = !this._room.flags[door];
+                            } else {
+                                this._game.hud.set_message('         the door is locked');
+                            }
+                        }
+                        break;
+                    case 19:
+                        if (door == 'small_purple_house_door') {
+                            if (this._game.hud.active_item == 'brown_key') {
+                                this._room.flags[door] = !this._room.flags[door];
+                            } else {
+                                this._game.hud.set_message('         the door is locked');
+                            }
+                        } else {
+                            this._room.flags[door] = !this._room.flags[door];
+                        }
+                        break;
+                    case 38:
+                        if (door == 'purple_house_door') {
+                            if (this._game.hud.active_item == 'purple_key') {
+                                this._room.flags[door] = !this._room.flags[door];
+                            } else {
+                                this._game.hud.set_message('         the door is locked');
+                            }
+                        }
+                        break;
+                    case 39:
+                        if (door == 'green_house_door') {
+                            if (this._game.hud.active_item == 'blue_key') {
+                                this._room.flags[door] = !this._room.flags[door];
+                            } else {
+                                this._game.hud.set_message('         the door is locked');
+                            }
+                        } else {
+                            this._room.flags[door] = !this._room.flags[door];
+                        }
+                        break;
+                    case 43:
+                        if (door == 'brown_house_door') {
+                            if (this._game.hud.active_item == 'grey_key') {
+                                this._room.flags[door] = !this._room.flags[door];
+                            } else {
+                                this._game.hud.set_message('         the door is locked');
+                            }
+                        }
+                        break;
+                    case 61:
+                        if (door == 'green_house_door') {
+                            if (this._game.hud.active_item == 'green_key') {
+                                this._room.flags[door] = !this._room.flags[door];
+                            } else {
+                                this._game.hud.set_message('         the door is locked');
+                            }
+                        }
+                        break;
+                    default:
+                        this._room.flags[door] = !this._room.flags[door];
+                }
+
                 if (this._room.flags[door]) {
                     this._game.house = door.slice(0, -5);
                 } else {
                     this._game.house = 'none';
                 }
 
-                if(this._game.room == 39 && this._game.house == 'green_house') {
+                if (this._game.room == 39 && this._game.house == 'green_house') {
                     this._game.hud.set_message('         dig between the two trees');
                     this._game.rooms.flags['buddy_asked'] = true;
                 }
@@ -98,7 +161,7 @@ class ActionScene extends Scene {
         // update room animation (water, torch)
         this._room.update(dt);
 
-        if(this._game.is_over) {
+        if (this._game.is_over) {
             this._hud.update(dt);
             if (this._input.isPressed(Input.KEY_RETURN)) {
                 location.reload();
@@ -107,13 +170,13 @@ class ActionScene extends Scene {
             if (this._input.isPressed(Input.KEY_RETURN)) {
                 this._initial = false;
                 this._hud.can_be(Player.HUMAN);
-                if(this._game.cheat_is_on) {
+                if (this._game.cheat_is_on) {
                     this._hud.can_be(Player.FISH);
                     this._hud.can_be(Player.SNOWFLAKE);
                     this._hud.can_be(Player.BIRD);
                 }
             } else {
-                if(this._initial.rawKey != Input.NO_KEY) {
+                if (this._initial.rawKey != Input.NO_KEY) {
                     this._game.enter_cheat();
                 }
             }
@@ -124,7 +187,7 @@ class ActionScene extends Scene {
             this._hud.update(dt);
             this.interaction();
 
-            if(this._game.cheat_is_on) {
+            if (this._game.cheat_is_on) {
                 // for debugging :)
                 this.manual_change_room();
             }
@@ -150,7 +213,7 @@ class ActionScene extends Scene {
                     this._game.hud.set_message('         you fell out of the world');
                     this._game.set_game_over();
                 } else {
-                    if(this._game.room == 34 || this._game.room == 52) {
+                    if (this._game.room == 34 || this._game.room == 52) {
                         this._game.hud.set_message('         you have drown');
                         this._game.set_game_over();
                     } else {
@@ -185,10 +248,10 @@ class ActionScene extends Scene {
             ctx.restore();
         }
 
-        this._font.print(ctx, 0, 200-64, `${this._game.room}`);
+        this._font.print(ctx, 0, 200 - 64, `${this._game.room}`);
 
-        if(this._game.is_over) {
-            this._font.print(ctx, ~~((320-16*8)/2+0.5), ~~((200-64-8)/2+0.5), 'THE GAME IS OVER');
+        if (this._game.is_over) {
+            this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8) / 2 + 0.5), 'THE GAME IS OVER');
             this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO RESTART');
         }
     };

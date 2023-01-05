@@ -10,21 +10,21 @@ class Player {
     #face;
     #oxygen;
     #oxygen_timer;
-    #x; 
-    #y; 
-    #anim_count; 
-    #anim_speed; 
+    #x;
+    #y;
+    #anim_count;
+    #anim_speed;
     #fall_anim;
-    #left_anim = []; 
-    #right_anim = []; 
-    #ladder_anim = []; 
-    #bird_left_anim; 
-    #bird_right_anim; 
+    #left_anim = [];
+    #right_anim = [];
+    #ladder_anim = [];
+    #bird_left_anim;
+    #bird_right_anim;
 
     #dead_player;
-    #right_0;
     #right_1;
     #right_2;
+    #right_0;
     #left_0;
     #left_1;
     #left_2;
@@ -42,12 +42,12 @@ class Player {
     #on_ladder_1;
     #on_ladder_2;
 
-    #falling; 
-    #height_counter; 
-    #bullet; 
-    #bullet_x; 
-    #bullet_y; 
-    #bullet_fired; 
+    #falling;
+    #height_counter;
+    #bullet;
+    #bullet_x;
+    #bullet_y;
+    #bullet_fired;
     #bullet_vx;
 
     #granade;
@@ -138,6 +138,15 @@ class Player {
         Object.defineProperty(this, 'oxygen', {
             get: () => {
                 return this.#oxygen;
+            }
+        });
+
+        Object.defineProperty(this, 'bullet_fired', {
+            get: () => {
+                return this.#bullet_fired;
+            },
+            set: (value) => {
+                this.#bullet_fired = value;
             }
         });
 
@@ -249,7 +258,7 @@ class Player {
         this.#granade_vy = -30;
         this.#granade_threw = true;
         if(!this.#game.cheat_is_on) {
-            this._game.hud.remove_active_item();
+            this.#game.hud.remove_active_item();
         }
     }
 
@@ -373,6 +382,8 @@ class Player {
                 if (!zones.includes('water') && back != 'water' && !this.#game.cheat_is_on) {
                     this.#game.hud.set_message('         you have drown');
                     this.#game.set_game_over();
+                } else {
+                    this.#oxygen = 9;
                 }
                 break;
         }
@@ -450,11 +461,12 @@ class Player {
                 this.#y = (zones.includes('water') ? 80 + 16 : 80);
                 if(!this.#game.cheat_is_on) {
                     if (this.#height_counter > 5) {
-                        this.#game.hud.set_message('         you have fall from height          ');
+                        this.#game.hud.set_message('         you have fall from height');
                         this.#face = Player.FACE_DEAD;
                         this.#x = this.#x - 20;
                         this.#y = 200-64-16-8;
                         this.#game.set_game_over();
+                        return;
                     }
                 }
             }
@@ -554,10 +566,17 @@ class Player {
                         this.#anim_count = 0;
                     } else {
                         this.#anim_speed += dt;
-                        if (this.#anim_speed > 0.2) {
+                        if (this.#anim_speed > 0.08) {
                             this.#anim_speed = 0;
                             this.#anim_count = (this.#anim_count + 1) % 2;
                             this.#y -= 8;
+                        }
+                    }
+                } else {
+                    zones = this.#game.zone.hit_multi({ x: this.#x, y: this.#y, w: 16, h: 40 });
+                    if (zones.includes('bed')) {
+                        if (this.#face == Player.FACE_BED) {
+                            this.#face = Player.FACE_LEFT;
                         }
                     }
                 }
@@ -571,10 +590,28 @@ class Player {
                         this.#anim_count = 0;
                     } else {
                         this.#anim_speed += dt;
-                        if (this.#anim_speed > 0.2) {
+                        if (this.#anim_speed > 0.08) {
                             this.#anim_speed = 0;
                             this.#anim_count = (this.#anim_count + 1) % 2;
                             this.#y += 8;
+                        }
+                    }
+                } else {
+                    zones = this.#game.zone.hit_multi({ x: this.#x, y: this.#y, w: 16, h: 40 });
+                    if (zones.includes('bed')) {
+                        if (this.#face != Player.FACE_BED) {
+                            this.#face = Player.FACE_BED;
+                            switch (this.#game.room) {
+                                case 38:
+                                    this.#game.hud.can_be(Player.SNOWFLAKE);
+                                    break;
+                                case 43:
+                                    this.#game.hud.can_be(Player.FISH);
+                                    break;
+                                case 61:
+                                    this.#game.hud.can_be(Player.BIRD);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -687,7 +724,8 @@ class Player {
     };
 
     update = (dt) => {
-        if(this.#game.rooms.is_dark_room(this.#game.room)) return;
+        if (this.#game.rooms.is_dark_room(this.#game.room) || (this.#game.is_over)) return;
+
         switch (this.#kind) {
             case Player.HUMAN:
                 this.human_form_update(dt);
@@ -731,6 +769,7 @@ class Player {
     }
 
     draw = (ctx) => {
+
         if(this.#game.rooms.is_dark_room(this.#game.room)) return;
 
         // For debugging only
@@ -749,6 +788,8 @@ class Player {
                     this.#use_right.draw(ctx, ~~(this.#x + 0.5), ~~(this.#y + 0.5));
                 } else if(this.#face == Player.FACE_DEAD) {
                     this.#dead_player.draw(ctx, ~~(this.#x + 0.5), ~~(this.#y + 0.5));
+                } else if(this.#face == Player.FACE_BED) {
+                    this.#dead_player.draw(ctx, 160,200-64-16-8-16);
                 }
                 break
             case Player.FISH:
@@ -797,3 +838,4 @@ Player.FACE_LADDER = 2;
 Player.FACE_USE_LEFT = 3;
 Player.FACE_USE_RIGHT = 4;
 Player.FACE_DEAD = 5;
+Player.FACE_BED = 6;
