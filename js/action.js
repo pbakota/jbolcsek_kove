@@ -25,9 +25,9 @@ class ActionScene extends Scene {
         this.game.hud = this._hud;
 
         this._game.room = 17; // start in this room
-        // this._game.room = 9; // start in this room
+        // this._game.room = 52; // start in this room
         this._player.x = 148;
-        // this._player.x = 32;
+        // this._player.x = 200;
         // this._player.x = 300;
         this._player.y = 200-64-16-40;
     }
@@ -63,6 +63,11 @@ class ActionScene extends Scene {
                 } else {
                     this._game.house = 'none';
                 }
+
+                if(this._game.room == 39 && this._game.house == 'green_house') {
+                    this._game.hud.set_message('         dig between the two trees');
+                    this._game.rooms.flags['buddy_asked'] = true;
+                }
             }
         } else if (this._input.isDown(Input.KEY_SPACE) && this._input.isPressed(Input.KEY_DOWN)) {
             this._hud.open_hud();
@@ -72,7 +77,7 @@ class ActionScene extends Scene {
         }
     };
 
-    debug = () => {
+    manual_change_room = () => {
         // For debugging only (navigate between rooms by keyboard)
         if (this._input.isPressed(Input.KEY_PGDOWN)) {
             // prev room
@@ -93,15 +98,24 @@ class ActionScene extends Scene {
         // update room animation (water, torch)
         this._room.update(dt);
 
-        if (this._initial) {
+        if(this._game.is_over) {
+            this._hud.update(dt);
+            if (this._input.isPressed(Input.KEY_RETURN)) {
+                location.reload();
+            }
+        } else if (this._initial) {
             if (this._input.isPressed(Input.KEY_RETURN)) {
                 this._initial = false;
                 this._hud.can_be(Player.HUMAN);
-                this._hud.can_be(Player.FISH);
-                this._hud.can_be(Player.SNOWFLAKE);
-                this._hud.can_be(Player.BIRD);
-
-                //this._hud.set_message('         welcome to stone of sages game. a new adventure will begin now...         ');
+                if(this._game.cheat_is_on) {
+                    this._hud.can_be(Player.FISH);
+                    this._hud.can_be(Player.SNOWFLAKE);
+                    this._hud.can_be(Player.BIRD);
+                }
+            } else {
+                if(this._initial.rawKey != Input.NO_KEY) {
+                    this._game.enter_cheat();
+                }
             }
         } else if (this._hud.open) {
             // only hud interaction
@@ -110,8 +124,10 @@ class ActionScene extends Scene {
             this._hud.update(dt);
             this.interaction();
 
-            // for debugging
-            this.debug();
+            if(this._game.cheat_is_on) {
+                // for debugging :)
+                this.manual_change_room();
+            }
 
             this._player.update(dt);
 
@@ -131,10 +147,16 @@ class ActionScene extends Scene {
             } else if (this._player.y > 200 - 64) {
                 // down
                 if (this._game.room + 12 >= 72) {
-                    console.log('Out of map');
+                    this._game.hud.set_message('         you fell out of the world');
+                    this._game.set_game_over();
                 } else {
-                    this.#change_room(this._game.room + 12);
-                    this._player.y = -8;
+                    if(this._game.room == 34 || this._game.room == 52) {
+                        this._game.hud.set_message('         you have drown');
+                        this._game.set_game_over();
+                    } else {
+                        this.#change_room(this._game.room + 12);
+                        this._player.y = -8;
+                    }
                 }
             }
         }
@@ -152,7 +174,7 @@ class ActionScene extends Scene {
             this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO START');
         } else {
             // for debugging
-            this._game.zone.debug(ctx);
+            // this._game.zone.debug(ctx);
 
             // clipping area
             ctx.save();
@@ -164,5 +186,10 @@ class ActionScene extends Scene {
         }
 
         this._font.print(ctx, 0, 200-64, `${this._game.room}`);
+
+        if(this._game.is_over) {
+            this._font.print(ctx, ~~((320-16*8)/2+0.5), ~~((200-64-8)/2+0.5), 'THE GAME IS OVER');
+            this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO RESTART');
+        }
     };
 }

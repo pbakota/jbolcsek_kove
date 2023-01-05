@@ -216,11 +216,6 @@ class Room {
         }
     }
 
-    /**
-     * Returns room definition
-     * @param room The room number
-     * @returns A room defintion
-     */
     get = (room) => {
         return Rooms[room];
     }
@@ -290,7 +285,7 @@ class Room {
     }
 
     is_dark_room = (room) => {
-        return (this.#dark_rooms.includes(room) && (this.#game.hud.active_item != 'lamp'));
+        return (this.#dark_rooms.includes(room) && (this.#game.hud.active_item != 'lamp') && !this.#game.cheat_is_on);
     }
 
     leave = (room) => {
@@ -307,15 +302,15 @@ class Room {
         }
 
         if (this.is_dark_room(room)) {
-            console.log('Dark room and you do not have the lamp');
-            this.#game.hud.set_message('         nagyon sotet van!         valami a torkodra tekeredik es foljtogatni kezd.         ');
+            this.#game.hud.set_message('         it is very dark!         something wraps around your throat and you start to choke          ');
+            this.#game.set_game_over();
         }
     }
 
     draw = (ctx, room) => {
         this.#game.zone.clear();
 
-        if (this.#dark_rooms.includes(room) && (this.#game.hud.active_item != 'lamp')) {
+        if (this.is_dark_room()) {
 
         } else {
 
@@ -721,7 +716,7 @@ class Room {
                                             x: 48, y: 0, w: 16, h: 120, t: 'tree'
                                         });
                                     }
-                                    if (this.#flags['buddy_asked']) {
+                                    if (this.#flags['buddy_asked'] && !this.#flags['lamp_found']) {
                                         this.#game.zone.add({
                                             x: 160 - 4, y: 200 - 64 - 16 - 16 - 40, w: 16, h: 40 + 16, t: 'dig-place'
                                         });

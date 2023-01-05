@@ -218,10 +218,12 @@ class Input
     }
 
     isDown = (keyCode) => {
+        this._lastk = keyCode;
         return this._keys['k' + keyCode] == true;
     };
 
     isUp = (keyCode) => {
+        this._lastk = Input.NO_KEY;
         return this._keys['k' + keyCode] == false;
     };
 
@@ -235,7 +237,7 @@ class Input
         this._keys = {};
     }
 
-    rawKey = (keyCode) => {
+    rawKey = () => {
         if (this._lastk == Input.NO_KEY)
             return Input.NO_KEY;
 

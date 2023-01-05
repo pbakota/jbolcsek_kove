@@ -51,6 +51,7 @@ class Font
         this._font['/'] = new Sprite(this._graphics, 144 + 40 * 8, 496, 8, 8);
         this._font['.'] = new Sprite(this._graphics, 144 + 41 * 8, 496, 8, 8);
         this._font['!'] = new Sprite(this._graphics, 144 + 42 * 8, 496, 8, 8);
+        this._font[','] = new Sprite(this._graphics, 144 + 43 * 8, 496, 8, 8);
     }
 
     print = (ctx, x, y, txt) => {

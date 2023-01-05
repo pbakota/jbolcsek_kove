@@ -227,7 +227,7 @@ const Rooms = [
                 house: 'green_house',
                 visible: true,
                 name: 'axe'
-            },
+            }
         ]
     },
     // room 18
@@ -1266,7 +1266,7 @@ const Rooms = [
                 obj: 'torch'
             },
             {
-                x: 320 - 40 - 8, y: 200 - 64 - 16 - 48,
+                x: 320 - 40 - 16, y: 200 - 64 - 16 - 48,
                 obj: 'princess'
             },
             {
@@ -1354,7 +1354,14 @@ const Rooms = [
                 obj: 'ground'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 320 - 32 - 8, y: 104,
+                house: 'none',
+                visible: false,
+                name: 'green_key'
+            }
+        ]
     },
     // room 53 (fake)
     {

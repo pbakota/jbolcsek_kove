@@ -8,6 +8,8 @@ class Player {
     #input;
     #kind;
     #face;
+    #oxygen;
+    #oxygen_timer;
     #x; 
     #y; 
     #anim_count; 
@@ -19,6 +21,7 @@ class Player {
     #bird_left_anim; 
     #bird_right_anim; 
 
+    #dead_player;
     #right_0;
     #right_1;
     #right_2;
@@ -71,6 +74,8 @@ class Player {
         this.#granade = new Sprite(this.#graphics, 48, 40, 8, 8);
         this.#explode = new Sprite(this.#graphics, 32, 72, 16, 16);
 
+        this.#dead_player = new Sprite(this.#graphics, 80, 64, 40, 8);
+
         this.#right_0 = new Sprite(this.#graphics, 0, 128, 16, 40);
         this.#right_1 = new Sprite(this.#graphics, 16, 128, 16, 40);
         this.#right_2 = new Sprite(this.#graphics, 32, 128, 16, 40);
@@ -95,7 +100,7 @@ class Player {
         this.#bird_right_2 = new Sprite(this.#graphics, 128, 160, 16, 40);
 
         this.#on_ladder_1 = new Sprite(this.#graphics, 0, 72, 16, 48);
-        this._on_ladder_2 = new Sprite(this.#graphics, 16, 72, 16, 48);
+        this.#on_ladder_2 = new Sprite(this.#graphics, 16, 72, 16, 48);
 
         this.#left_anim = [this.#left_0, this.#left_1, this.#left_0, this.#left_2];
         this.#right_anim = [this.#right_0, this.#right_1, this.#right_0, this.#right_2];
@@ -130,6 +135,12 @@ class Player {
             }
         });
 
+        Object.defineProperty(this, 'oxygen', {
+            get: () => {
+                return this.#oxygen;
+            }
+        });
+
         Object.defineProperty(this, 'width', {
             get: () => {
                 switch (this.#kind) {
@@ -151,6 +162,10 @@ class Player {
                 }
             }
         })
+
+
+        this.#oxygen = 9;
+        this.#oxygen_timer = 0;
 
         this.#fall_anim = 0;
         this.#falling = false;
@@ -230,16 +245,18 @@ class Player {
     throw_granade = () => {
         this.#granade_x = this.#face == Player.FACE_USE_LEFT ? this.#x - 8 : this.#x + 16;
         this.#granade_y = this.#y + 10;
-        this.#granade_vx =  this.#face == Player.FACE_USE_LEFT ? -6 : 6;
+        this.#granade_vx =  this.#face == Player.FACE_USE_LEFT ? -1 : 1;
         this.#granade_vy = -30;
         this.#granade_threw = true;
-        // this._game.hud.remove_active_item();
+        if(!this.#game.cheat_is_on) {
+            this._game.hud.remove_active_item();
+        }
     }
 
     update_granade = (dt) => {
         if(this.#granade_threw) {
             this.#granade_vy += 1;
-            this.#granade_x += this.#granade_vx * dt * 8;
+            this.#granade_x += this.#granade_vx * dt * 45;
             this.#granade_y += dt * this.#granade_vy;
             if(this.#granade_y > 200-64-16-8) {
                 var zones = this.#game.zone.hit_multi({x: this.#granade_x, y: this.#granade_y - 8, w: 8, h: 8});
@@ -262,6 +279,17 @@ class Player {
                 if(zones.includes('bush_hit') || zones.includes('debris_hit')) {
                     this.#game.rooms.remove_detail(this.#game.room, zones.includes('bush_hit') ? 'bush' : 'debris');
                 }
+            }
+        }
+    }
+
+    use_spade = () => {
+        if(!this.#game.rooms.flags['lamp_found']) {
+            var zones = this.#game.zone.hit_multi({x: this.#x, y: this.#y, w: 16, h: 40});
+            if(zones.includes('dig-place')) {
+                var lamp = Rooms[18].items.find(e => e.name == 'lamp');
+                lamp.visible = true;
+                this.#game.rooms.flags['lamp_found'] = true;
             }
         }
     }
@@ -297,8 +325,15 @@ class Player {
                             this.#x = this.#x + 32 - 8;
                         }
                     }
-                    var zones = this.#game.zone.hit_multi({ x: this.#x, y: this.#y, w: 32, h: 16 });
-                    this.#y = (zones.includes('water') && (this.#game.room == 16 || this.#game.room == 13 || this.#game.room == 34 || this.#game.room == 52) ? 80 + 16 : 80);
+                    this.#falling = true;
+                    var zones = this.#game.zone.hit_multi({ x: this.#x, y: this.#y, w: 40, h: 16 });
+                    if((zones.includes('water') && (this.#game.room == 16 || this.#game.room == 13 || this.#game.room == 34 || this.#game.room == 52))) {
+                        this.#y = 80 + 16;
+                    } else if(this.#y + 40 >= 200-64-16) {
+                        this.#y =  80;
+                    } else {
+                        this.#falling = true;
+                    }
                 } else if (this.#kind == Player.BIRD) {
                     this.#falling = true;
                 }
@@ -314,9 +349,10 @@ class Player {
                     this.#face = Player.FACE_LEFT;
                 }
                 var zones = this.#game.zone.hit_multi({ x: this.#x, y: this.#y, w: 16, h: 16 });
-                if (!zones.includes('lava')) {
+                if (!zones.includes('lava') && !this.#game.cheat_is_on) {
                     this.#y = 200 - 64 - 16 - 16;
-                    console.log('You have frozen!');
+                    this.#game.hud.set_message('         you have frozen');
+                    this.#game.set_game_over();
                 }
                 break;
             case Player.FISH:
@@ -332,9 +368,11 @@ class Player {
                 } else {
                     this.#y = this.y + 40 - 16;
                 }
+                var back = this.#game.rooms.get(this.#game.room).back;
                 var zones = this.#game.zone.hit_multi({ x: this.#x, y: this.#y, w: 32, h: 16 });
-                if (!zones.includes('water')) {
-                    console.log('You have drown!');
+                if (!zones.includes('water') && back != 'water' && !this.#game.cheat_is_on) {
+                    this.#game.hud.set_message('         you have drown');
+                    this.#game.set_game_over();
                 }
                 break;
         }
@@ -357,10 +395,40 @@ class Player {
             case 'granade':
                 this.throw_granade();
                 break;
+            case 'spade':
+                this.use_spade();
+                break;
         }
     }
 
     human_form_update = (dt) => {
+        if(!this.#game.cheat_is_on) {
+            var back = this.#game.rooms.get(this.#game.room).back;
+            if(back == 'water' && this.#game.house == 'none') {
+                this.#oxygen_timer += dt;
+                if(this.#oxygen_timer > 1) {
+                    this.#oxygen_timer = 0;
+                    this.#oxygen --;
+
+                    if(this.#oxygen == 0) {
+                        this.#face = Player.FACE_DEAD;
+                        this.#x = this.#x - 20;
+                        this.#y = 200-64-16-8;
+                        this.#game.hud.set_message('         out of oxygen! you have drown');
+                        this.#game.set_game_over();
+                        return;
+                    }
+                }
+            } else if(back == 'lava') {
+                this.#face = Player.FACE_DEAD;
+                this.#x = this.#x - 20;
+                this.#y = 200-64-16-8;
+                this.#game.hud.set_message('         you have burned in the lava');
+                this.#game.set_game_over();
+                return;
+            }
+        }
+
         // gravity
         if (this.#face != Player.FACE_LADDER) {
             var zones = this.#game.zone.hit_multi({ x: this.#x + 4, y: this.#y + 40 - 1, w: 8, h: 8 });
@@ -370,7 +438,6 @@ class Player {
                 if (this.#fall_anim > 0.05) {
                     this.#fall_anim = 0;
                     this.#y += 8; // remove this line to turn off gravity
-                    console.log('FALLING');
                     if (!this.#falling) {
                         this.#height_counter = 0;
                         this.#falling = true;
@@ -381,8 +448,14 @@ class Player {
             } else if (this.#falling) {
                 this.#falling = false;
                 this.#y = (zones.includes('water') ? 80 + 16 : 80);
-                if (this.#height_counter > 5) {
-                    console.log('You have died!');
+                if(!this.#game.cheat_is_on) {
+                    if (this.#height_counter > 5) {
+                        this.#game.hud.set_message('         you have fall from height          ');
+                        this.#face = Player.FACE_DEAD;
+                        this.#x = this.#x - 20;
+                        this.#y = 200-64-16-8;
+                        this.#game.set_game_over();
+                    }
                 }
             }
         }
@@ -652,7 +725,7 @@ class Player {
         ctx.strokeStyle = 'yellow';
         ctx.beginPath();
         // ctx.rect(this._x, this._y+40, 16, 8);
-        const r = { x: this.#x + 4, y: this.#y + 40 - 16, w: 16, h: 16 };
+        const r = {x: this.#x, y: this.#y, w: 16, h: 40};
         ctx.rect(r.x, r.y, r.w, r.h);
         ctx.stroke();
     }
@@ -674,6 +747,8 @@ class Player {
                     this.#use_left.draw(ctx, ~~((this.#x - 8) + 0.5), ~~(this.#y + 0.5));
                 } else if (this.#face == Player.FACE_USE_RIGHT) {
                     this.#use_right.draw(ctx, ~~(this.#x + 0.5), ~~(this.#y + 0.5));
+                } else if(this.#face == Player.FACE_DEAD) {
+                    this.#dead_player.draw(ctx, ~~(this.#x + 0.5), ~~(this.#y + 0.5));
                 }
                 break
             case Player.FISH:
@@ -721,3 +796,4 @@ Player.FACE_RIGHT = 1;
 Player.FACE_LADDER = 2;
 Player.FACE_USE_LEFT = 3;
 Player.FACE_USE_RIGHT = 4;
+Player.FACE_DEAD = 5;

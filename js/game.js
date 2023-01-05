@@ -4,7 +4,7 @@ class Game
 {
     _engine; _renderer; _loader; _graphics; _input; _scene; _nextScene;
     _titleScene; _actionScene; _current_room; _active_item; _player; _room; _current_house; _hud;
-    _zone;
+    _zone; _game_over; _game_cheat_is_on; _cheat_char_index; _cheat_text;
 
     constructor() {
 
@@ -15,6 +15,8 @@ class Game
 
         this._renderer.options(320, 200, 4);
         this._engine = new Engine(this, this._renderer, this._loader);
+
+        this._game_over = false;
     }
 
     run = () => {
@@ -94,8 +96,56 @@ class Game
             }
         });
 
+        Object.defineProperty(this, 'is_over', {
+            get: () => {
+                return this._game_over;
+            }
+        });
+
+        Object.defineProperty(this, 'cheat_is_on', {
+            get: () => {
+                return this._game_cheat_is_on;
+            },
+            set: (value) => {
+                this._game_cheat_is_on = value;
+            }
+        });
+
+        this._cheat_char_index = 0;
+        this._cheat_text = [
+            'KeyA',
+            'KeyB',
+            'KeyR',
+            'KeyA',
+            'KeyK',
+            'KeyA',
+            'KeyD',
+            'KeyA',
+            'KeyB',
+            'KeyR',
+            'KeyA'
+        ];
+
+        this._game_cheat_is_on = false;
         this._current_house = 'none';
     };
+
+    enter_cheat = () => {
+        var c = this._input.rawKey();
+        if(c != Input.NO_KEY) {
+            // console.log(`c=${c}, next_char=${this._cheat_text[this._cheat_char_index]}`);
+            if(c == this._cheat_text[this._cheat_char_index]) {
+                this._cheat_char_index ++;
+                if(this._cheat_char_index == this._cheat_text.length) {
+                    this._game_cheat_is_on = true;
+                    console.log('cheats are enabled');
+                }
+            } else {
+                // reset the index if the key is missed
+                this._cheat_char_index = 0;
+            }
+        }
+    }
 
     ready = () => {
         console.log('Game ready.');
@@ -111,6 +161,10 @@ class Game
                 this._nextScene = this._actionScene;
         }
     };
+
+    set_game_over = () => {
+        this._game_over = true;
+    }
 
     update = (dt) => {
         if (this._nextScene) {

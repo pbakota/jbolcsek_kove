@@ -86,7 +86,7 @@ class Hud {
             'purple_key',
             'green_key',
             'flower',
-            'granate',
+            'granade',
             'ladder',
             'pistol',
             'axe',
@@ -114,8 +114,8 @@ class Hud {
         this.#message_timer = 0;
         this.#message_count = 0;
 
-        this.#item_slot[0] = 'granade';
-        this.#active_item = 0;
+        // this.#item_slot[0] = 'flower';
+        // this.#active_item = 0;
 
     }
 
@@ -157,8 +157,9 @@ class Hud {
                         this.#morph_cursor = 0;
                         break;
                     case Hud.COMMAND_GIVEUP: // Give up
-                        console.log('** GIVE UP!!');
                         this.#hud_open = false;
+                        this.#game.set_game_over();
+                        this.set_message('         you have given up');
                         break;
                 }
             }
@@ -204,16 +205,20 @@ class Hud {
                     case Hud.COMMAND_MORPH: // Morph
                         switch (this.#morph_cursor) {
                             case 0: // Human
-                                this.#game.player.transform_to(Player.HUMAN);
+                                if(this.#can_be_human)
+                                    this.#game.player.transform_to(Player.HUMAN);
                                 break;
                             case 1: // Fish
-                                this.#game.player.transform_to(Player.FISH);
+                                if(this.#can_be_fish)
+                                    this.#game.player.transform_to(Player.FISH);
                                 break;
                             case 2: // Snowflake
-                                this.#game.player.transform_to(Player.SNOWFLAKE);
+                                if(this.#can_be_snowflake)
+                                    this.#game.player.transform_to(Player.SNOWFLAKE);
                                 break;
                             case 3: // Bird
-                                this.#game.player.transform_to(Player.BIRD);
+                                if(this.#can_be_bird)
+                                    this.#game.player.transform_to(Player.BIRD);
                                 break;
                         }
                         break;
@@ -245,6 +250,10 @@ class Hud {
                     this.#message_timer = 0;
                     this.#message_count ++;
                 }
+            }
+
+            if(this.#message.length == this.#message_count && this.#game.is_over) {
+                this.#message_count = 0;
             }
         }
     }
@@ -304,11 +313,30 @@ class Hud {
         }
     }
 
+    #give_flower = (slot) => {
+        this.#game.hud.set_message('         thank you, I will give you something in return');
+        this.#item_slot[slot] = 'empty';
+        var key = Rooms[52].items.find(e => e.name == 'green_key');
+        key.visible = true;
+    }
+    
     #give_item = (slot) => {
         if (this.#game.player.face == Player.FACE_LEFT) {
-
+            if(this.#item_slot[slot] == 'flower') {
+                var zones = this.#game.zone.hit_multi({ x: this.#player.x - 4, y: this.#player.y, w: 8, h: 40 });
+                console.log(zones);
+                if(zones.includes('princess')) {
+                    this.#give_flower(slot);
+                }
+            }
         } else if (this.#game.player.face == Player.FACE_RIGHT) {
-
+            if(this.#item_slot[slot] == 'flower') {
+                var zones = this.#game.zone.hit_multi({ x: this.#player.x + 8, y: this.#player.y, w: 16, h: 40 });
+                console.log(zones);
+                if(zones.includes('princess')) {
+                    this.#give_flower(slot);
+                }
+            }
         }
     }
 
@@ -348,7 +376,7 @@ class Hud {
         this.#font.print(ctx, 16, 200 - 64 + 8 + 4 * 8, 'MORPH');
         this.#font.print(ctx, 16, 200 - 64 + 8 + 5 * 8, 'GIVE UP');
 
-        this.#font.print(ctx, 136, 200 - 64 + 8, 'OXYGEN:9');
+        this.#font.print(ctx, 136, 200 - 64 + 8, `OXYGEN:${this.#player.oxygen}`);
 
         if (this.#hud_open) {
             if (this.#command_cursor >= 0) {
