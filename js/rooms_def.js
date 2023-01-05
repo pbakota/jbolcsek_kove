@@ -100,13 +100,13 @@ const Rooms = [
                 x: 120, y: 104,
                 house: 'brown_house',
                 visible: true,
-                name: 'granate'
+                name: 'granade'
             },
             {
                 x: 120 + 16, y: 104,
                 house: 'brown_house',
                 visible: true,
-                name: 'granate'
+                name: 'granade'
             },
         ]
     },
@@ -795,14 +795,14 @@ const Rooms = [
                 y: 104,
                 house: 'small_brown1_house',
                 visible: true,
-                name: 'granate'
+                name: 'granade'
             },
             {
                 x: 24 + 16,
                 y: 104,
                 house: 'small_brown1_house',
                 visible: true,
-                name: 'granate'
+                name: 'granade'
             },
         ]
     },
@@ -1076,7 +1076,7 @@ const Rooms = [
                 x: 32 + 16 - 16, y: 200-64-16-16,
                 house: 'small_brown1_house',
                 visible: true,
-                name: 'granate'
+                name: 'granade'
             }
         ]
     },
@@ -1517,7 +1517,14 @@ const Rooms = [
                 obj: 'lava'
             }
         ],
-        items: []
+        items: [
+            {
+                x: 320-16*4, y: 104,
+                house: 'none',
+                visible: true,
+                name: 'granade'
+            }
+        ]
     },
     // room 57
     {
@@ -1803,7 +1810,7 @@ const Rooms = [
                 x: 120 + 16 + 32 + 16, y: 200-64-16-16,
                 house: 'green_house',
                 visible: true,
-                name: 'granate'
+                name: 'granade'
             }
         ]
     },

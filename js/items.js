@@ -11,7 +11,7 @@ class ItemManager {
     #purple_key;
     #green_key;
     #flower;
-    #granate;
+    #granade;
     #ladder;
     #pistol;
     #axe;
@@ -32,7 +32,7 @@ class ItemManager {
         this.#purple_key = new Sprite(this.#graphics, 48 + 32, 80, 8, 16);
         this.#green_key = new Sprite(this.#graphics, 48 + 40, 80, 8, 16);
         this.#flower = new Sprite(this.#graphics, 48 + 48, 80, 8, 16);
-        this.#granate = new Sprite(this.#graphics, 48 + 0, 96, 8, 16);
+        this.#granade = new Sprite(this.#graphics, 48 + 0, 96, 8, 16);
         this.#ladder = new Sprite(this.#graphics, 48 + 8, 96, 8, 16);
         this.#pistol = new Sprite(this.#graphics, 48 + 16, 96, 8, 16);
         this.#axe = new Sprite(this.#graphics, 48 + 24, 96, 8, 16);
@@ -65,8 +65,8 @@ class ItemManager {
             case 'flower':
                 this.#flower.draw(ctx, x, y);
                 break;
-            case 'granate':
-                this.#granate.draw(ctx, x, y);
+            case 'granade':
+                this.#granade.draw(ctx, x, y);
                 break;
             case 'ladder':
                 this.#ladder.draw(ctx, x, y);

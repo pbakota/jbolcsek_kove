@@ -30,11 +30,7 @@ class ActionScene extends Scene {
         // this._player.x = 32;
         // this._player.x = 300;
         this._player.y = 200-64-16-40;
-
     }
-
-    drawRoom = (ctx) => {
-    };
 
     init = () => { };
 
@@ -104,6 +100,8 @@ class ActionScene extends Scene {
                 this._hud.can_be(Player.FISH);
                 this._hud.can_be(Player.SNOWFLAKE);
                 this._hud.can_be(Player.BIRD);
+
+                //this._hud.set_message('         welcome to stone of sages game. a new adventure will begin now...         ');
             }
         } else if (this._hud.open) {
             // only hud interaction
@@ -154,7 +152,7 @@ class ActionScene extends Scene {
             this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO START');
         } else {
             // for debugging
-            // this._game.zone.debug(ctx);
+            this._game.zone.debug(ctx);
 
             // clipping area
             ctx.save();

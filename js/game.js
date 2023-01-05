@@ -93,6 +93,8 @@ class Game
                 this._active_item = value;
             }
         });
+
+        this._current_house = 'none';
     };
 
     ready = () => {

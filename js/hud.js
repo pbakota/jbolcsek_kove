@@ -27,10 +27,13 @@ class Hud {
     #item_cursor;
     #morph_cursor;
     #morph_cursor_pos;
-    #selected_item;
     #active_item;
     #item_slot;
     #all_pickable_items;
+
+    #message;
+    #message_timer;
+    #message_count;
 
     // ctor
     constructor(game) {
@@ -68,12 +71,11 @@ class Hud {
         this.#selected_command = -1;
         this.#item_cursor = -1;
         this.#morph_cursor = -1;
-        this.#selected_item = -1;
         this.#active_item = -1;
 
         this.#morph_cursor_pos = [120, 152, 184, 208]
         this.#item_slot = [
-            'empty','empty','empty','empty','empty'
+            'empty', 'empty', 'empty', 'empty', 'empty'
         ];
 
         this.#all_pickable_items = [
@@ -104,9 +106,17 @@ class Hud {
 
         Object.defineProperty(this, 'active_item', {
             get: () => {
-                return this.#item_slot[this.#active_item];
+                return this.#active_item != -1 ? this.#item_slot[this.#active_item] : 'none';
             }
         })
+
+        this.#message = '';
+        this.#message_timer = 0;
+        this.#message_count = 0;
+
+        this.#item_slot[0] = 'granade';
+        this.#active_item = 0;
+
     }
 
     open_hud = () => {
@@ -114,108 +124,110 @@ class Hud {
         this.#selected_command = -1;
         this.#item_cursor = -1;
         this.#morph_cursor = -1;
+        this.#message = '';
+        this.#message_timer = 0;
+        this.#message_count = 0;
     }
 
-    update = (dt) => {
-        if (this.#hud_open) {
-            // hud interaction
-
-            if (this.#input.isPressed(Input.KEY_ESCAPE)) {
-                this.#hud_open = false;
-                return;
+    hud_interaction = () => {
+        if (this.#input.isPressed(Input.KEY_ESCAPE)) {
+            this.#hud_open = false;
+            return;
+        }
+        if (this.#selected_command == -1) {
+            // select command
+            if (this.#input.isPressed(Input.KEY_DOWN)) {
+                if (this.#command_cursor < 5) {
+                    this.#command_cursor++;
+                }
+            } else if (this.#input.isPressed(Input.KEY_UP)) {
+                if (this.#command_cursor > 0) {
+                    this.#command_cursor--;
+                }
+            } else if (this.#input.isPressed(Input.KEY_SPACE)) {
+                this.#selected_command = this.#command_cursor;
+                switch (this.#selected_command) {
+                    case Hud.COMMAND_TAKE: // Take
+                    case Hud.COMMAND_DROP: // Drop
+                    case Hud.COMMAND_GIVE: // Give
+                    case Hud.COMMAND_USE: // Use
+                        this.#item_cursor = 0;
+                        break;
+                    case Hud.COMMAND_MORPH: // Morph
+                        this.#morph_cursor = 0;
+                        break;
+                    case Hud.COMMAND_GIVEUP: // Give up
+                        console.log('** GIVE UP!!');
+                        this.#hud_open = false;
+                        break;
+                }
             }
-            if (this.#selected_command == -1) {
-                // select command
-                if (this.#input.isPressed(Input.KEY_DOWN)) {
-                    if (this.#command_cursor < 5) {
-                        this.#command_cursor++;
-                    }
-                } else if (this.#input.isPressed(Input.KEY_UP)) {
-                    if (this.#command_cursor > 0) {
-                        this.#command_cursor--;
-                    }
-                } else if (this.#input.isPressed(Input.KEY_SPACE)) {
-                    this.#selected_command = this.#command_cursor;
-                    switch (this.#selected_command) {
-                        case Hud.COMMAND_TAKE: // Take
-                        case Hud.COMMAND_DROP: // Drop
-                        case Hud.COMMAND_GIVE: // Give
-                        case Hud.COMMAND_USE: // Use
-                            this.#item_cursor = 0;
-                            break;
-                        case Hud.COMMAND_MORPH: // Morph
-                            this.#morph_cursor = 0;
-                            break;
-                        case Hud.COMMAND_GIVEUP: // Give up
-                            console.log('** GIVE UP!!');
-                            this.#hud_open = false;
-                            break;
-                    }
+        } else {
+            if (this.#input.isPressed(Input.KEY_LEFT)) {
+                if (this.#item_cursor > 0) {
+                    this.#item_cursor--;
                 }
-            } else {
-                if (this.#input.isPressed(Input.KEY_LEFT)) {
-                    if (this.#item_cursor > 0) {
-                        this.#item_cursor--;
-                    }
-                    if (this.#morph_cursor > 0) {
-                        this.#morph_cursor--;
-                    }
-                } else if (this.#input.isPressed(Input.KEY_RIGHT)) {
-                    if (this.#item_cursor >= 0 && this.#item_cursor < 4) {
-                        this.#item_cursor++;
-                    }
-                    if (this.#morph_cursor >= 0 && this.#morph_cursor < 3) {
-                        this.#morph_cursor++;
-                    }
-                } else if (this.#input.isPressed(Input.KEY_SPACE)) {
-
-                    // execute command
-                    switch (this.#selected_command) {
-                        case Hud.COMMAND_TAKE: // Take
-                            if (this.#item_slot[this.#item_cursor] == 'empty' && this.#game.player.kind == Player.HUMAN) {
-                                this.#take_item(this.#item_cursor);
-                            }
-                            break;
-                        case Hud.COMMAND_DROP: // Drop
-                            if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
-                                this.#drop_item(this.#item_cursor);
-                            }
-                            break;
-                        case Hud.COMMAND_GIVE: // Give
-                            if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
-                                this.#give_item(this.#item_cursor);
-                            }
-                            break;
-                        case Hud.COMMAND_USE: // Use
-                            if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
-                                this.#use_item(this.#item_cursor);
-                            }
-                            break;
-                        case Hud.COMMAND_MORPH: // Morph
-                            switch (this.#morph_cursor) {
-                                case 0: // Human
-                                    this.#game.player.transform_to(Player.HUMAN);
-                                    break;
-                                case 1: // Fish
-                                    this.#game.player.transform_to(Player.FISH);
-                                    break;
-                                case 2: // Snowflake
-                                    this.#game.player.transform_to(Player.SNOWFLAKE);
-                                    break;
-                                case 3: // Bird
-                                    this.#game.player.transform_to(Player.BIRD);
-                                    break;
-                            }
-                            break;
-                        case Hud.COMMAND_GIVEUP: // Give up
-                            break;
-                    }
-
-                    // close hud after when command is executed
-                    this.#hud_open = false;
+                if (this.#morph_cursor > 0) {
+                    this.#morph_cursor--;
                 }
+            } else if (this.#input.isPressed(Input.KEY_RIGHT)) {
+                if (this.#item_cursor >= 0 && this.#item_cursor < 4) {
+                    this.#item_cursor++;
+                }
+                if (this.#morph_cursor >= 0 && this.#morph_cursor < 3) {
+                    this.#morph_cursor++;
+                }
+            } else if (this.#input.isPressed(Input.KEY_SPACE)) {
+
+                // execute command
+                switch (this.#selected_command) {
+                    case Hud.COMMAND_TAKE: // Take
+                        if (this.#item_slot[this.#item_cursor] == 'empty' && this.#game.player.kind == Player.HUMAN) {
+                            this.#take_item(this.#item_cursor);
+                        }
+                        break;
+                    case Hud.COMMAND_DROP: // Drop
+                        if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
+                            this.#drop_item(this.#item_cursor);
+                        }
+                        break;
+                    case Hud.COMMAND_GIVE: // Give
+                        if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
+                            this.#give_item(this.#item_cursor);
+                        }
+                        break;
+                    case Hud.COMMAND_USE: // Use
+                        if (this.#item_slot[this.#item_cursor] != 'empty' && this.#game.player.kind == Player.HUMAN) {
+                            this.#use_item(this.#item_cursor);
+                        }
+                        break;
+                    case Hud.COMMAND_MORPH: // Morph
+                        switch (this.#morph_cursor) {
+                            case 0: // Human
+                                this.#game.player.transform_to(Player.HUMAN);
+                                break;
+                            case 1: // Fish
+                                this.#game.player.transform_to(Player.FISH);
+                                break;
+                            case 2: // Snowflake
+                                this.#game.player.transform_to(Player.SNOWFLAKE);
+                                break;
+                            case 3: // Bird
+                                this.#game.player.transform_to(Player.BIRD);
+                                break;
+                        }
+                        break;
+                    case Hud.COMMAND_GIVEUP: // Give up
+                        break;
+                }
+
+                // close hud after when command is executed
+                this.#hud_open = false;
             }
         }
+    }
+
+    animate_bird = (dt) => {
 
         // animate bird
         this.#anim_speed += dt;
@@ -225,18 +237,47 @@ class Hud {
         }
     }
 
+    update_message = (dt) => {
+        if(this.#message.length != 0) {
+            if(this.#message.length > 9 && this.#message_count < this.#message.length) {
+                this.#message_timer += dt;
+                if(this.#message_timer > 0.125) {
+                    this.#message_timer = 0;
+                    this.#message_count ++;
+                }
+            }
+        }
+    }
+
+    set_message = (message) => {
+        this.#message_timer = 0;
+        this.#message_count = 0;
+        this.#message = message;
+    }
+
+    update = (dt) => {
+        if (this.#hud_open) {
+            this.hud_interaction();
+        }
+
+        this.animate_bird(dt);
+        this.update_message(dt);
+    }
+
     #take_item = (slot) => {
         if (this.#game.player.face == Player.FACE_LEFT) {
-            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x-4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
+            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x - 4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
             if (this.#all_pickable_items.includes(item.name)) {
                 this.#item_slot[slot] = item.name;
                 this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
+                this.#message = item.name;
             }
         } else if (this.#game.player.face == Player.FACE_RIGHT) {
-            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x+4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
+            var item = this.#game.rooms.items.get_item(this.#game.room, this.#game.house, { x: this.#player.x + 4, y: this.#player.y + 40 - 16, w: 16, h: 16 });
             if (this.#all_pickable_items.includes(item.name)) {
                 this.#item_slot[slot] = item.name;
                 this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
+                this.#message = item.name;
             }
         }
     }
@@ -244,7 +285,7 @@ class Hud {
     #drop_item = (slot) => {
         if (this.#game.player.face == Player.FACE_LEFT) {
             const item = {
-                x: this.#game.player.x+4, y: this.#player.y + 40 - 16,
+                x: this.#game.player.x + 4, y: this.#player.y + 40 - 16,
                 name: this.#item_slot[slot],
                 visible: true,
                 house: this.#game.house,
@@ -253,7 +294,7 @@ class Hud {
             this.#game.rooms.items.add_item_to_room(this.#game.room, item);
         } else if (this.#game.player.face == Player.FACE_RIGHT) {
             const item = {
-                x: this.#game.player.x+4, y: this.#player.y + 40-16,
+                x: this.#game.player.x + 4, y: this.#player.y + 40 - 16,
                 name: this.#item_slot[slot],
                 visible: true,
                 house: this.#game.house,
@@ -273,6 +314,12 @@ class Hud {
 
     #use_item = (slot) => {
         this.#active_item = slot;
+    }
+
+    remove_active_item = () => {
+        if (this.#active_item != -1) {
+            this.#item_slot[this.#active_item] = 'empty';
+        }
     }
 
     can_be = (kind) => {
@@ -335,8 +382,12 @@ class Hud {
         for (var i in this.#item_slot) {
             var it = this.#item_slot[i];
             if (it != 'empty') {
-                this.#game.rooms.items.draw_item(ctx, it, 240 + i * 16, 200-64 + 32);
+                this.#game.rooms.items.draw_item(ctx, it, 240 + i * 16, 200 - 64 + 32);
             }
+        }
+
+        if(this.#message.length > 0) {
+            this.#font.print(ctx, 240, 200-64+8, this.#message.substring(this.#message_count, this.#message_count + Math.min(this.#message.length - this.#message_count, 9)));
         }
     }
 }

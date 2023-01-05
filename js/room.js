@@ -80,6 +80,8 @@ class Room {
     #mob_rooms;
     #mob;
 
+    #dark_rooms;
+
     // ctor
     constructor(game) {
         this.#game = game;
@@ -197,6 +199,8 @@ class Room {
         this.#mob = null;
         this.#mob_rooms = [7, 8, 10, 21, 30, 42, 50, 55, 65];
 
+        this.#dark_rooms = [45, 51];
+
         this.#flags['tree_cut'] = false;        // true: When the tree in room 18 has bee cut
         this.#flags['ladder_put'] = false;      // true: when the ladder in room 18 has been put
         this.#flags['buddy_asked'] = false;     // true: when the underwater buddy asked about where to dig
@@ -273,9 +277,13 @@ class Room {
         }
     }
 
+    is_dark_room = (room) => {
+        return (this.#dark_rooms.includes(room) && (this.#game.hud.active_item != 'lamp'));
+    }
+
     leave = (room) => {
         this.#mob = null;
-        this.#game.player.bullet_fired = false;
+        this.#game.player.clear_tools();
     }
 
     enter = (room) => {
@@ -285,514 +293,532 @@ class Room {
         if (this.#mob_rooms.includes(this.#game.room)) {
             this.#mob = new Mob(this.#game);
         }
+
+        if (this.is_dark_room(room)) {
+            console.log('Dark room and you do not have the lamp');
+            this.#game.hud.set_message('         nagyon sotet van!         valami a torkodra tekeredik es foljtogatni kezd.         ');
+        }
     }
 
     draw = (ctx, room) => {
         this.#game.zone.clear();
 
-        // back
-        var back = this.#get_tile(Rooms[room].back);
-        for (var j = 0; j < 25; ++j) {
-            for (var i = 0; i < 40; ++i) {
-                back.draw(ctx, i * 8, j * 8);
-            }
-        }
+        if (this.#dark_rooms.includes(room) && (this.#game.hud.active_item != 'lamp')) {
 
-        // room animations
-        if (this.#animations.length && !this.#first_draw) {
-            for (var i = 0; i < this.#animations.length; ++i) {
-                var it = this.#animations[i];
-                switch (it.name) {
-                    case 'torch':
-                        this.#torch_anim[it.anim_frame].draw(ctx, it.x, it.y);
-                        break;
-                    case 'water':
-                        this.#water_anim[it.anim_frame].draw(ctx, it.x, it.y);
-                        break;
+        } else {
+
+            // back
+            var back = this.#get_tile(Rooms[room].back);
+            for (var j = 0; j < 25; ++j) {
+                for (var i = 0; i < 40; ++i) {
+                    back.draw(ctx, i * 8, j * 8);
                 }
             }
-        }
 
-        // floor
-        if (Rooms[room].floor != 'none') {
-            var floor = this.#get_floor(Rooms[room].floor);
-            for (var i = 0; i < 20; ++i) {
-                floor.draw(ctx, i * 16, (200 - 64 - 16));
-                this.#game.zone.add({
-                    x: i * 16, y: (200 - 64 - 16), w: 16, h: 16, t: Rooms[room].floor
-                });
+            // room animations
+            if (this.#animations.length && !this.#first_draw) {
+                for (var i = 0; i < this.#animations.length; ++i) {
+                    var it = this.#animations[i];
+                    switch (it.name) {
+                        case 'torch':
+                            this.#torch_anim[it.anim_frame].draw(ctx, it.x, it.y);
+                            break;
+                        case 'water':
+                            this.#water_anim[it.anim_frame].draw(ctx, it.x, it.y);
+                            break;
+                    }
+                }
             }
-        }
 
-        if (Rooms[room].floor == 'water' && this.#first_draw) {
-            for (var i = 0; i < 40; ++i) {
-                this.#animations.push({
-                    x: i * 8, y: 200 - 64 - 16, anim_timer: 0, anim_frame: (i % 8), name: 'water'
-                });
+            // floor
+            if (Rooms[room].floor != 'none') {
+                var floor = this.#get_floor(Rooms[room].floor);
+                for (var i = 0; i < 20; ++i) {
+                    floor.draw(ctx, i * 16, (200 - 64 - 16));
+                    this.#game.zone.add({
+                        x: i * 16, y: (200 - 64 - 16), w: 16, h: 16, t: Rooms[room].floor
+                    });
+                }
             }
-        }
 
-        var water_frame = 0;
-        // details
-        if (Rooms[room].details.length) {
-            for (var d in Rooms[room].details) {
-                const x = Rooms[room].details[d].x;
-                const y = Rooms[room].details[d].y;
-                const ob = Rooms[room].details[d].obj;
+            if (Rooms[room].floor == 'water' && this.#first_draw) {
+                for (var i = 0; i < 40; ++i) {
+                    this.#animations.push({
+                        x: i * 8, y: 200 - 64 - 16, anim_timer: 0, anim_frame: (i % 8), name: 'water'
+                    });
+                }
+            }
 
-                switch (ob) {
-                    case 'purple_house':
-                        if (this.#flags['purple_house_door']) {
-                            this.#purple_in_house.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 96, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 96 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            });
-                            this.#items.draw_visible_items(ctx, room, 'purple_house');
-                            if (room == 38) {
-                                this.#bed.draw(ctx, 160, 104);
+            var water_frame = 0;
+            // details
+            if (Rooms[room].details.length) {
+                for (var d in Rooms[room].details) {
+                    const x = Rooms[room].details[d].x;
+                    const y = Rooms[room].details[d].y;
+                    const ob = Rooms[room].details[d].obj;
+
+                    switch (ob) {
+                        case 'purple_house':
+                            if (this.#flags['purple_house_door']) {
+                                this.#purple_in_house.draw(ctx, x, y);
                                 this.#game.zone.add({
-                                    x: 160, y: 104, w: 40, h: 16, t: 'bed'
-                                })
+                                    x: x + 8, y: y + 16, w: 96, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 96 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                });
+                                this.#items.draw_visible_items(ctx, room, 'purple_house');
+                                if (room == 38) {
+                                    this.#bed.draw(ctx, 160, 104);
+                                    this.#game.zone.add({
+                                        x: 160, y: 104, w: 40, h: 16, t: 'bed'
+                                    })
+                                }
+                            } else {
+                                this.#purple_out_house.draw(ctx, x, y);
                             }
-                        } else {
-                            this.#purple_out_house.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 48, y: y + 24, w: 16, h: 40, t: 'purple_house_door'
-                        });
-                        break;
-                    case 'brown_house':
-                        if (this.#flags['brown_house_door']) {
-                            this.#brown_in_house.draw(ctx, x, y);
                             this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 96, h: 8, t: 'wall'
+                                x: x + 48, y: y + 24, w: 16, h: 40, t: 'purple_house_door'
                             });
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#game.zone.add({
-                                x: x + 96 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#items.draw_visible_items(ctx, room, 'brown_house');
-                            if (room == 43) {
-                                this.#bed.draw(ctx, 160, 104);
+                            break;
+                        case 'brown_house':
+                            if (this.#flags['brown_house_door']) {
+                                this.#brown_in_house.draw(ctx, x, y);
                                 this.#game.zone.add({
-                                    x: 160, y: 104, w: 40, h: 16, t: 'bed'
+                                    x: x + 8, y: y + 16, w: 96, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
                                 })
-                            }
-                        } else {
-                            this.#brown_out_house.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 48, y: y + 24, w: 16, h: 40, t: 'brown_house_door'
-                        });
-                        break;
-                    case 'green_house':
-                        if (this.#flags['green_house_door']) {
-                            this.#green_in_house.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 96, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#game.zone.add({
-                                x: x + 96 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#items.draw_visible_items(ctx, room, 'green_house');
-                            if (room == 39) {
-                                this.#buddy.draw(ctx, 192 - 8, 200 - 64 - 16 - 40);
                                 this.#game.zone.add({
-                                    x: 192 - 8, y: 200 - 64 - 16 - 40, w: 8, h: 40, t: 'buddy'
+                                    x: x + 96 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
                                 })
+                                this.#items.draw_visible_items(ctx, room, 'brown_house');
+                                if (room == 43) {
+                                    this.#bed.draw(ctx, 160, 104);
+                                    this.#game.zone.add({
+                                        x: 160, y: 104, w: 40, h: 16, t: 'bed'
+                                    })
+                                }
+                            } else {
+                                this.#brown_out_house.draw(ctx, x, y);
                             }
-                            if (room == 61) {
-                                this.#bed.draw(ctx, 160, 104);
+                            this.#game.zone.add({
+                                x: x + 48, y: y + 24, w: 16, h: 40, t: 'brown_house_door'
+                            });
+                            break;
+                        case 'green_house':
+                            if (this.#flags['green_house_door']) {
+                                this.#green_in_house.draw(ctx, x, y);
                                 this.#game.zone.add({
-                                    x: 160, y: 104, w: 40, h: 16, t: 'bed'
+                                    x: x + 8, y: y + 16, w: 96, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
                                 })
-                            }
-                        } else {
-                            this.#green_out_house.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 48, y: y + 24, w: 16, h: 40, t: 'green_house_door'
-                        });
-                        break;
-                    case 'green_hut':
-                        if (this.#flags['green_hut_door']) {
-                            this.#green_in_hut.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 0, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#game.zone.add({
-                                x: x + 48 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#items.draw_visible_items(ctx, room, 'green_hut');
-                        } else {
-                            this.#green_out_hut.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 8, y: y + 24, w: 16, h: 40, t: 'green_hut_door'
-                        });
-                        break;
-                    case 'purple_hut':
-                        if (this.#flags['purple_hut_door']) {
-                            this.#purple_in_hut.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 0, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#game.zone.add({
-                                x: x + 48 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#items.draw_visible_items(ctx, room, 'purple_hut');
-                        } else {
-                            this.#purple_out_hut.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 8, y: y + 24, w: 16, h: 40, t: 'purple_hut_door'
-                        });
-                        break;
-                    case 'brown_hut':
-                        if (this.#flags['brown_hut_door']) {
-                            this.#brown_in_hut.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 0, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#game.zone.add({
-                                x: x + 48 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#items.draw_visible_items(ctx, room, 'brown_hut');
-                        } else {
-                            this.#brown_out_hut.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 8, y: y + 24, w: 16, h: 40, t: 'brown_hut_door'
-                        });
-                        break;
-                    case 'small_brown1_house':
-                        if (this.#flags['small_brown1_house_door']) {
-                            this.#small_brown1_in_house.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 56 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            });
-                            this.#items.draw_visible_items(ctx, room, 'small_brown1_house');
-                        } else {
-                            this.#small_brown1_out_house.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 40, y: y + 24, w: 16, h: 40, t: 'small_brown1_house_door'
-                        });
-                        break;
-                    case 'small_brown2_house':
-                        if (this.#flags['small_brown2_house_door']) {
-                            this.#small_brown2_in_house.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#game.zone.add({
-                                x: x + 56 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            })
-                            this.#items.draw_visible_items(ctx, room, 'small_brown2_house');
-                        } else {
-                            this.#small_brown2_out_house.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 40, y: y + 24, w: 16, h: 40, t: 'small_brown2_house_door'
-                        });
-                        break;
-                    case 'small_purple_house':
-                        if (this.#flags['small_purple_house_door']) {
-                            this.#small_purple_in_house.draw(ctx, x, y);
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
-                            });
-                            this.#game.zone.add({
-                                x: x + 56 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
-                            });
-                            if (room == 19) {
-                                this.#ladder_head.draw(ctx, 48, 72 + 8 + 1);
                                 this.#game.zone.add({
-                                    x: 48, y: 72 + 8, w: 16, h: 128, t: 'ladder'
+                                    x: x + 96 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#items.draw_visible_items(ctx, room, 'green_house');
+                                if (room == 39) {
+                                    this.#buddy.draw(ctx, 192 - 8, 200 - 64 - 16 - 40);
+                                    this.#game.zone.add({
+                                        x: 192 - 8, y: 200 - 64 - 16 - 40, w: 8, h: 40, t: 'buddy'
+                                    })
+                                }
+                                if (room == 61) {
+                                    this.#bed.draw(ctx, 160, 104);
+                                    this.#game.zone.add({
+                                        x: 160, y: 104, w: 40, h: 16, t: 'bed'
+                                    })
+                                }
+                            } else {
+                                this.#green_out_house.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 48, y: y + 24, w: 16, h: 40, t: 'green_house_door'
+                            });
+                            break;
+                        case 'green_hut':
+                            if (this.#flags['green_hut_door']) {
+                                this.#green_in_hut.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 0, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#game.zone.add({
+                                    x: x + 48 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#items.draw_visible_items(ctx, room, 'green_hut');
+                            } else {
+                                this.#green_out_hut.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 8, y: y + 24, w: 16, h: 40, t: 'green_hut_door'
+                            });
+                            break;
+                        case 'purple_hut':
+                            if (this.#flags['purple_hut_door']) {
+                                this.#purple_in_hut.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 0, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#game.zone.add({
+                                    x: x + 48 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#items.draw_visible_items(ctx, room, 'purple_hut');
+                            } else {
+                                this.#purple_out_hut.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 8, y: y + 24, w: 16, h: 40, t: 'purple_hut_door'
+                            });
+                            break;
+                        case 'brown_hut':
+                            if (this.#flags['brown_hut_door']) {
+                                this.#brown_in_hut.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 0, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#game.zone.add({
+                                    x: x + 48 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#items.draw_visible_items(ctx, room, 'brown_hut');
+                            } else {
+                                this.#brown_out_hut.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 8, y: y + 24, w: 16, h: 40, t: 'brown_hut_door'
+                            });
+                            break;
+                        case 'small_brown1_house':
+                            if (this.#flags['small_brown1_house_door']) {
+                                this.#small_brown1_in_house.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 56 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                });
+                                this.#items.draw_visible_items(ctx, room, 'small_brown1_house');
+                            } else {
+                                this.#small_brown1_out_house.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 40, y: y + 24, w: 16, h: 40, t: 'small_brown1_house_door'
+                            });
+                            break;
+                        case 'small_brown2_house':
+                            if (this.#flags['small_brown2_house_door']) {
+                                this.#small_brown2_in_house.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#game.zone.add({
+                                    x: x + 56 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                })
+                                this.#items.draw_visible_items(ctx, room, 'small_brown2_house');
+                            } else {
+                                this.#small_brown2_out_house.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 40, y: y + 24, w: 16, h: 40, t: 'small_brown2_house_door'
+                            });
+                            break;
+                        case 'small_purple_house':
+                            if (this.#flags['small_purple_house_door']) {
+                                this.#small_purple_in_house.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 16, w: 56, h: 8, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 8, y: y + 24, w: 4, h: 40, t: 'wall'
+                                });
+                                this.#game.zone.add({
+                                    x: x + 56 + 4, y: y + 24, w: 4, h: 40, t: 'wall'
+                                });
+                                if (room == 19) {
+                                    this.#ladder_head.draw(ctx, 48, 72 + 8 + 1);
+                                    this.#game.zone.add({
+                                        x: 48, y: 72 + 8, w: 16, h: 128, t: 'ladder'
+                                    });
+                                }
+                                this.#items.draw_visible_items(ctx, room, 'small_purple_house');
+                            } else {
+                                this.#small_purple_out_house.draw(ctx, x, y);
+                            }
+                            this.#game.zone.add({
+                                x: x + 40, y: y + 24, w: 16, h: 40, t: 'small_purple_house_door'
+                            });
+                            break;
+                        case 'cave_left':
+                            this.#cave_left.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 200 - 64, t: 'wall'
+                            });
+                            break;
+                        case 'cave_right':
+                            this.#cave_right.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 8, y: y, w: 16, h: 200 - 64, t: 'wall'
+                            });
+                            break;
+                        case 'cave_left_short':
+                            this.#cave_left_short.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 200 - 64 - 16, t: 'wall'
+                            });
+                            break;
+                        case 'cave_right_short':
+                            this.#cave_right_short.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 8, y: y, w: 16, h: 200 - 64 - 16, t: 'wall'
+                            });
+                            break;
+                        case 'cave_top':
+                            this.#cave_top.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 320, h: 16, t: 'wall'
+                            });
+                            break;
+                        case 'cave_top_short':
+                            this.#cave_top_short.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 240, h: 16, t: 'wall'
+                            });
+                            break;
+                        case 'cave_top_left':
+                            this.#cave_top_left.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 104, h: 16, t: 'wall'
+                            });
+                            break;
+                        case 'cave_top_right':
+                            this.#cave_top_right.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 104, h: 16, t: 'wall'
+                            });
+                            break;
+                        case 'cave':
+                            this.#cave.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 16, t: 'cave'
+                            });
+                            break;
+                        case 'lava_left':
+                            this.#lava_left.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 8, y: y, w: 8, h: 16, t: 'lava'
+                            });
+                            this.#game.zone.add({
+                                x: x, y: y, w: 8, h: 16, t: 'rock'
+                            });
+                            break;
+                        case 'lava_right':
+                            this.#lava_right.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 8, h: 16, t: 'lava'
+                            });
+                            this.#game.zone.add({
+                                x: x + 8, y: y, w: 8, h: 16, t: 'rock'
+                            });
+                            break;
+                        case 'water_left':
+                            this.#water_left.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 8, y: y, w: 8, h: 16, t: 'water'
+                            });
+                            this.#game.zone.add({
+                                x: x, y: y, w: 8, h: 16, t: 'rock'
+                            });
+                            if (this.#first_draw) {
+                                this.#animations.push({
+                                    x: x + 8, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
                                 });
                             }
-                            this.#items.draw_visible_items(ctx, room, 'small_purple_house');
-                        } else {
-                            this.#small_purple_out_house.draw(ctx, x, y);
-                        }
-                        this.#game.zone.add({
-                            x: x + 40, y: y + 24, w: 16, h: 40, t: 'small_purple_house_door'
-                        });
-                        break;
-                    case 'cave_left':
-                        this.#cave_left.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 200 - 64, t: 'wall'
-                        });
-                        break;
-                    case 'cave_right':
-                        this.#cave_right.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 8, y: y, w: 16, h: 200 - 64, t: 'wall'
-                        });
-                        break;
-                    case 'cave_left_short':
-                        this.#cave_left_short.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 200 - 64 - 16, t: 'wall'
-                        });
-                        break;
-                    case 'cave_right_short':
-                        this.#cave_right_short.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 8, y: y, w: 16, h: 200 - 64 - 16, t: 'wall'
-                        });
-                        break;
-                    case 'cave_top':
-                        this.#cave_top.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 320, h: 16, t: 'wall'
-                        });
-                        break;
-                    case 'cave_top_short':
-                        this.#cave_top_short.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 240, h: 16, t: 'wall'
-                        });
-                        break;
-                    case 'cave_top_left':
-                        this.#cave_top_left.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 104, h: 16, t: 'wall'
-                        });
-                        break;
-                    case 'cave_top_right':
-                        this.#cave_top_right.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 104, h: 16, t: 'wall'
-                        });
-                        break;
-                    case 'cave':
-                        this.#cave.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 16, t: 'cave'
-                        });
-                        break;
-                    case 'lava_left':
-                        this.#lava_left.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 8, y: y, w: 8, h: 16, t: 'lava'
-                        });
-                        this.#game.zone.add({
-                            x: x, y: y, w: 8, h: 16, t: 'rock'
-                        });
-                        break;
-                    case 'lava_right':
-                        this.#lava_right.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 8, h: 16, t: 'lava'
-                        });
-                        this.#game.zone.add({
-                            x: x + 8, y: y, w: 8, h: 16, t: 'rock'
-                        });
-                        break;
-                    case 'water_left':
-                        this.#water_left.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 8, y: y, w: 8, h: 16, t: 'water'
-                        });
-                        this.#game.zone.add({
-                            x: x, y: y, w: 8, h: 16, t: 'rock'
-                        });
-                        if (this.#first_draw) {
-                            this.#animations.push({
-                                x: x + 8, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                            break;
+                        case 'water_right':
+                            this.#water_right.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 8, h: 16, t: 'water'
                             });
-                        }
-                        break;
-                    case 'water_right':
-                        this.#water_right.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 8, h: 16, t: 'water'
-                        });
-                        this.#game.zone.add({
-                            x: x + 8, y: y, w: 8, h: 16, t: 'rock'
-                        });
-                        if (this.#first_draw) {
-                            this.#animations.push({
-                                x: x, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                            this.#game.zone.add({
+                                x: x + 8, y: y, w: 8, h: 16, t: 'rock'
                             });
-                        }
-                        break;
-                    case 'torch':
-                        if (this.#first_draw) {
-                            this.#torch_0.draw(ctx, x, y);
-                            this.#animations.push({
-                                x: x, y: y, anim_timer: 0, anim_frame: 0, name: 'torch'
+                            if (this.#first_draw) {
+                                this.#animations.push({
+                                    x: x, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                                });
+                            }
+                            break;
+                        case 'torch':
+                            if (this.#first_draw) {
+                                this.#torch_0.draw(ctx, x, y);
+                                this.#animations.push({
+                                    x: x, y: y, anim_timer: 0, anim_frame: 0, name: 'torch'
+                                });
+                            }
+                            break;
+                        case 'ladder':
+                            this.#ladder.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y - 48, w: 16, h: 120 + 48, t: 'ladder'
                             });
-                        }
-                        break;
-                    case 'ladder':
-                        this.#ladder.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y - 48, w: 16, h: 120 + 48, t: 'ladder'
-                        });
-                        break;
-                    case 'ladder_head':
-                        this.#ladder_head.draw(ctx, x, y + 1);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 120, t: 'ladder'
-                        });
-                        break;
-                    case 'tree':
-                        if (x != 32 - 8) {
-                            // if not left tree, then do nothing
-                            this.#tree.draw(ctx, x, y);
-                        } else {
-                            if (this.#game.room == 18) {
-                                if (!this.#flags['tree_cut']) {
-                                    this.#tree.draw(ctx, x, y);
-                                    this.#game.zone.add({
-                                        x: 48, y: y, w: 16, h: 120 - 8, t: 'tree'
-                                    });
-                                } else if (this.#flags['ladder_put']) {
-                                    this.#ladder.draw(ctx, 48, 0);
-                                    this.#game.zone.add({
-                                        x: 48, y: -48, w: 16, h: 120 + 48, t: 'ladder'
-                                    });
-                                } else {
-                                    this.#game.zone.add({
-                                        x: 48, y: 0, w: 16, h: 120, t: 'tree'
-                                    });
-                                }
-                                if (this.#flags['buddy_asked']) {
-                                    this.#game.zone.add({
-                                        x: 160 - 4, y: 200 - 64 - 16 - 16 - 40, w: 16, h: 40 + 16, t: 'dig-place'
-                                    });
-                                }
-                            } else
+                            break;
+                        case 'ladder_head':
+                            this.#ladder_head.draw(ctx, x, y + 1);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 120, t: 'ladder'
+                            });
+                            break;
+                        case 'tree':
+                            if (x != 32 - 8) {
+                                // if not left tree, then do nothing
                                 this.#tree.draw(ctx, x, y);
-                        }
-                        break;
-                    case 'alga_flower':
-                        this.#flower.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 8, h: 40, t: 'flower'
-                        });
-                        break;
-                    case 'princess':
-                        this.#princess.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 8, h: 48, t: 'princess'
-                        });
-                        break;
-                    case 'debris':
-                        this.#debris.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 0, y: y + 0, w: 32, h: 24, t: 'debris'
-                        });
-                        break;
-                    case 'bush':
-                        this.#bush.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 0, y: y + 0, w: 32, h: 24, t: 'bush'
-                        });
-                        break;
-                    case 'waterfront_left':
-                        this.#waterfront_left.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 12, h: 16, t: 'waterfront'
-                        });
-                        break;
-                    case 'waterfront_right':
-                        this.#waterfront_right.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x + 4, y: y, w: 16, h: 16, t: 'waterfront'
-                        });
-                        break;
-                    case 'ground':
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 16, t: 'ground'
-                        });
-                        break;
-                    case 'water':
-                        this.#water.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 16, t: 'water'
-                        });
-                        if (this.#first_draw) {
-                            this.#animations.push({
-                                x: x, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                            } else {
+                                if (this.#game.room == 18) {
+                                    if (!this.#flags['tree_cut']) {
+                                        this.#tree.draw(ctx, x, y);
+                                        this.#game.zone.add({
+                                            x: 48, y: y, w: 16, h: 120 - 8, t: 'tree'
+                                        });
+                                    } else if (this.#flags['ladder_put']) {
+                                        this.#ladder.draw(ctx, 48, 0);
+                                        this.#game.zone.add({
+                                            x: 48, y: -48, w: 16, h: 120 + 48, t: 'ladder'
+                                        });
+                                    } else {
+                                        this.#game.zone.add({
+                                            x: 48, y: 0, w: 16, h: 120, t: 'tree'
+                                        });
+                                    }
+                                    if (this.#flags['buddy_asked']) {
+                                        this.#game.zone.add({
+                                            x: 160 - 4, y: 200 - 64 - 16 - 16 - 40, w: 16, h: 40 + 16, t: 'dig-place'
+                                        });
+                                    }
+                                } else
+                                    this.#tree.draw(ctx, x, y);
+                            }
+                            break;
+                        case 'alga_flower':
+                            if (!this.#game.rooms.flags['flower_cut']) {
+                                this.#flower.draw(ctx, x, y);
+                                this.#game.zone.add({
+                                    x: x, y: y, w: 8, h: 40, t: 'alga_flower'
+                                });
+                            }
+                            break;
+                        case 'princess':
+                            this.#princess.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 8, h: 48, t: 'princess'
                             });
-                            this.#animations.push({
-                                x: x + 8, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                            break;
+                        case 'debris':
+                            this.#debris.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 0, y: y + 0, w: 32, h: 24, t: 'debris'
                             });
-                        }
-                        break;
-                    case 'lava':
-                        this.#lava.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 16, t: 'lava'
-                        });
-                        break;
-                    case 'rock':
-                        this.#rock.draw(ctx, x, y);
-                        this.#game.zone.add({
-                            x: x, y: y, w: 16, h: 16, t: 'rock'
-                        });
-                        break;
+                            this.#game.zone.add({
+                                x: x + 8 + 4, y: y + 16, w: 8, h: 8, t: 'debris_hit'
+                            });
+                            break;
+                        case 'bush':
+                            this.#bush.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 0, y: y + 0, w: 32, h: 24, t: 'bush'
+                            });
+                            this.#game.zone.add({
+                                x: x + 8 + 4, y: y + 16, w: 8, h: 8, t: 'bush_hit'
+                            });
+                            break;
+                        case 'waterfront_left':
+                            this.#waterfront_left.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 12, h: 16, t: 'waterfront'
+                            });
+                            break;
+                        case 'waterfront_right':
+                            this.#waterfront_right.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x + 4, y: y, w: 16, h: 16, t: 'waterfront'
+                            });
+                            break;
+                        case 'ground':
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 16, t: 'ground'
+                            });
+                            break;
+                        case 'water':
+                            this.#water.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 16, t: 'water'
+                            });
+                            if (this.#first_draw) {
+                                this.#animations.push({
+                                    x: x, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                                });
+                                this.#animations.push({
+                                    x: x + 8, y: y, anim_timer: 0, anim_frame: (water_frame++ % 8), name: 'water'
+                                });
+                            }
+                            break;
+                        case 'lava':
+                            this.#lava.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 16, t: 'lava'
+                            });
+                            break;
+                        case 'rock':
+                            this.#rock.draw(ctx, x, y);
+                            this.#game.zone.add({
+                                x: x, y: y, w: 16, h: 16, t: 'rock'
+                            });
+                            break;
+                    }
                 }
             }
-        }
 
-        this.#items.draw_visible_items(ctx, room, 'none');
-        // border rooms
-        if (room >= 0 && room <= 11) {
-            this.#game.zone.add({
-                x: 0, y: -16, w: 320, h: 8, t: 'wall'
-            });
-        }
-        if ((room % 12) == 0) {
-            this.#game.zone.add({
-                x: -8, y: 0, w: 8, h: 200 - 64, t: 'wall'
-            });
-        } else if (((room - 11) % 12) == 0) {
-            this.#game.zone.add({
-                x: 320, y: 0, w: 8, h: 200 - 64, t: 'wall'
-            });
+            this.#items.draw_visible_items(ctx, room, 'none');
+            // border rooms
+            if (room >= 0 && room <= 11) {
+                this.#game.zone.add({
+                    x: 0, y: -16, w: 320, h: 8, t: 'wall'
+                });
+            }
+            if ((room % 12) == 0) {
+                this.#game.zone.add({
+                    x: -8, y: 0, w: 8, h: 200 - 64, t: 'wall'
+                });
+            } else if (((room - 11) % 12) == 0) {
+                this.#game.zone.add({
+                    x: 320, y: 0, w: 8, h: 200 - 64, t: 'wall'
+                });
+            }
+
+            if (this.#mob) {
+                this.#mob.draw(ctx);
+            }
         }
 
         this.#first_draw = false;
-
-        if (this.#mob) {
-            this.#mob.draw(ctx);
-        }
     }
 }
