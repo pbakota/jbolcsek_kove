@@ -216,8 +216,20 @@ class Room {
         }
     }
 
+    /**
+     * Returns room definition
+     * @param room The room number
+     * @returns A room defintion
+     */
     get = (room) => {
         return Rooms[room];
+    }
+
+    remove_detail = (room, obj) => {
+        var index = Rooms[room].details.findIndex(e => e.obj == obj);
+        if(index >= 0) {
+            Rooms[room].details.splice(index,1);
+        }
     }
 
     #get_tile = (name) => {

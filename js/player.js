@@ -256,8 +256,12 @@ class Player {
 
         if(this.#exploding) {
             this.#exploding_timer += dt;
-            if(this.#exploding_timer > 1.0) {
+            if(this.#exploding_timer > 0.5) {
                 this.#exploding = false;
+                var zones = this.#game.zone.hit_multi({x: this.#granade_x, y: this.#granade_y - 8, w: 8, h: 8});
+                if(zones.includes('bush_hit') || zones.includes('debris_hit')) {
+                    this.#game.rooms.remove_detail(this.#game.room, zones.includes('bush_hit') ? 'bush' : 'debris');
+                }
             }
         }
     }

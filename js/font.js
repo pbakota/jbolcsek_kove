@@ -8,6 +8,7 @@ class Font
         this._graphics = this._game.graphics;
 
         this._font[' '] = new Sprite(this._graphics, 144 + 0 * 8, 496, 8, 8);
+        this._font['_'] = new Sprite(this._graphics, 144 + 0 * 8, 496, 8, 8);
         this._font['A'] = new Sprite(this._graphics, 144 + 1 * 8, 496, 8, 8);
         this._font['B'] = new Sprite(this._graphics, 144 + 2 * 8, 496, 8, 8);
         this._font['C'] = new Sprite(this._graphics, 144 + 3 * 8, 496, 8, 8);

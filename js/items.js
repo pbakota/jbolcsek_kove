@@ -128,7 +128,7 @@ class ItemManager {
     }
 
     remove_item_from_room = (room, index) => {
-        Rooms[room].items.splice(index);
+        Rooms[room].items.splice(index,1);
     }
 
     add_item_to_room = (room, item) => {
