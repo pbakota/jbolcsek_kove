@@ -285,8 +285,11 @@ class Room {
 
         if (this.#mob) {
             this.#mob.update(dt);
-            if ((this.#mob.x < -8 || this.#mob.x > 320) || (this.#mob.y < -8 || this.#mob.y > 200))
+            if ((this.#mob.x < -8 || this.#mob.x > 320) || (this.#mob.y < -8 || this.#mob.y > 200)) {
                 this.#mob = new Mob(this.#game);
+            } else {
+                this.#game.player.hit_by_mob(this.#mob);
+            }
         }
     }
 

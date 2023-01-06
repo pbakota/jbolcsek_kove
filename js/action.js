@@ -146,13 +146,13 @@ class ActionScene extends Scene {
             if (this._game.room > 0) {
                 this.#change_room(this._game.room - 1);
             }
-            console.log(`Current room: ${this._game.room}`);
+            // console.log(`Current room: ${this._game.room}`);
         } else if (this._input.isPressed(Input.KEY_PGUP)) {
             // next room
             if (this._game.room < 71) {
                 this.#change_room(this._game.room + 1);
             }
-            console.log(`Current room: ${this._game.room}`);
+            // console.log(`Current room: ${this._game.room}`);
         }
     }
 
@@ -254,7 +254,8 @@ class ActionScene extends Scene {
             ctx.restore();
         }
 
-        this._font.print(ctx, 0, 200 - 64, `${this._game.room}`);
+        if(this._game.cheat_is_on)
+            this._font.print(ctx, 0, 200 - 64, `${this._game.room}`);
 
         if (this._game.is_over) {
             if(this._game.is_success) {

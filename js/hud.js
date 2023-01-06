@@ -346,7 +346,6 @@ class Hud {
         if (this.#game.player.face == Player.FACE_LEFT) {
             if(this.#item_slot[slot] == 'flower') {
                 var zones = this.#game.zone.hit_multi({ x: this.#player.x - 4, y: this.#player.y, w: 8, h: 40 });
-                console.log(zones);
                 if(zones.includes('princess')) {
                     this.#give_flower(slot);
                 }
@@ -354,7 +353,6 @@ class Hud {
         } else if (this.#game.player.face == Player.FACE_RIGHT) {
             if(this.#item_slot[slot] == 'flower') {
                 var zones = this.#game.zone.hit_multi({ x: this.#player.x + 8, y: this.#player.y, w: 16, h: 40 });
-                console.log(zones);
                 if(zones.includes('princess')) {
                     this.#give_flower(slot);
                 }

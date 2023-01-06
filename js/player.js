@@ -271,10 +271,6 @@ class Player {
             this.#granade_x += this.#granade_vx * dt * 45;
             this.#granade_y += dt * this.#granade_vy;
             if(this.#granade_y > 200-64-16-8) {
-                var zones = this.#game.zone.hit_multi({x: this.#granade_x, y: this.#granade_y - 8, w: 8, h: 8});
-                if(zones.includes('bush_hit') || zones.includes('debris_hit')) {
-                    console.log(`${zones} hit with granade`);
-                }
                 this.#exploding = true;
                 this.#exploding_x = this.#granade_x - 4;
                 this.#exploding_y = this.#granade_y - 4;
@@ -303,6 +299,18 @@ class Player {
                 lamp.visible = true;
                 this.#game.rooms.flags['lamp_found'] = true;
             }
+        }
+    }
+
+    hit_by_mob = (mob) => {
+        if(!this.#game.cheat_is_on && mob.hit({x: this.#x, y: this.#y, w: 16, h: 40 })) {
+            // hit by mob
+            this.#game.hud.set_message('         you have been hit by a monster');
+            this.#face = Player.FACE_DEAD;
+            this.#x = this.#x - 20;
+            this.#y = 200-64-16-8;
+            this.#game.set_game_over();
+            return;
         }
     }
 
