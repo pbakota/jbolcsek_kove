@@ -258,14 +258,13 @@ Input.KEY_RIGHT = 'ArrowRight';
 Input.KEY_UP = 'ArrowUp';
 Input.KEY_RETURN = 'Enter';
 Input.KEY_ESCAPE = 'Escape';
-Input.KEY_Y = 'y';
-Input.KEY_N = 'n';
+Input.KEY_Y = 'KeyY';
+Input.KEY_N = 'KeyN';
 Input.KEY_BS = 'Backspace';
 Input.KEY_SPACE = 'Space';
 Input.KEY_PGDOWN = 'PageDown';
 Input.KEY_PGUP = 'PageUp';
-Input.KEY_P = 'p';
-Input.KEY_O = 'o';
+Input.KEY_L = 'KeyL';
 
 class Sprite
 {

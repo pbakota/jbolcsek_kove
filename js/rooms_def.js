@@ -1,5 +1,5 @@
 
-const Rooms = [
+var Rooms = [
     // room 0
     {
         back: 'air',

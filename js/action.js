@@ -164,6 +164,9 @@ class ActionScene extends Scene {
             this._hud.update(dt);
             if (this._input.isPressed(Input.KEY_RETURN)) {
                 location.reload();
+            } else if(this._game.snapshot_is_on && this._input.isPressed(Input.KEY_L)) {
+                // load snapshot
+                this._game.load_snapshot();
             }
         } else if (this._initial) {
             if (this._input.isPressed(Input.KEY_RETURN)) {
@@ -173,6 +176,10 @@ class ActionScene extends Scene {
                     this._hud.can_be(Player.FISH);
                     this._hud.can_be(Player.SNOWFLAKE);
                     this._hud.can_be(Player.BIRD);
+                }
+                if(this._game.snapshot_is_on) {
+                    this._game.save_player_position();
+                    this._game.save_snapshot(this._game.room);
                 }
             } else {
                 if (this._initial.rawKey != Input.NO_KEY) {
@@ -196,16 +203,16 @@ class ActionScene extends Scene {
             // exit from room
             if (this._player.x < -8) {
                 // left
-                this.#change_room(this._game.room - 1);
                 this._player.x = 320 - this._player.width;
+                this.#change_room(this._game.room - 1);
             } else if (this._player.x > 320 - 8) {
                 // right
-                this.#change_room(this._game.room + 1);
                 this._player.x = 0;
+                this.#change_room(this._game.room + 1);
             } else if (this._player.y + (this._player.height >> 1) < 0) {
                 // up
-                this.#change_room(this._game.room - 12);
                 this._player.y = 200 - 64 - 16;
+                this.#change_room(this._game.room - 12);
             } else if (this._player.y > 200 - 64) {
                 // down
                 if (this._game.room + 12 >= 72) {
@@ -216,8 +223,8 @@ class ActionScene extends Scene {
                         this._game.hud.set_message('         you have drown');
                         this._game.set_game_over();
                     } else {
-                        this.#change_room(this._game.room + 12);
                         this._player.y = -8;
+                        this.#change_room(this._game.room + 12);
                     }
                 }
             }
@@ -254,9 +261,12 @@ class ActionScene extends Scene {
                 this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8 - 16) / 2 + 0.5), 'congratulations!');
                 this._font.print(ctx, ~~((320 - 31 * 8) / 2 + 0.5), ~~((200 - 64 - 8 + 16) / 2 + 0.5), 'you have completed the mission!');
             } else {
-            this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8) / 2 + 0.5), 'the game is over');
+                this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8) / 2 + 0.5), 'the game is over');
+                if(this._game.snapshot_is_on) {
+                    this._font.print(ctx, ~~((320 - 27 * 8) / 2 + 0.5), ~~(16 + 112 - 4 - 8 + 0.5), 'press /l/ to load snapshot or');
+                }
             }
-            this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'press /enter/ to restart');
+            this._font.print(ctx, ~~((320 - 22 * 8) / 2 + 0.5), ~~(16 + 112 - 4 + 0.5), 'press /enter/ to restart');
         }
     };
 }

@@ -185,11 +185,13 @@ class Room {
         });
 
         Object.defineProperty(this, 'flags', {
-            get: () => { return this.#flags }
+            get: () => { return this.#flags },
+            set: (value) => { this.#flags = value; }
         })
 
         Object.defineProperty(this, 'mob', {
-            get: () => { return this.#mob }
+            get: () => { return this.#mob },
+            set: (value) => { this.#mob = value; }
         })
 
         this.#flags = {};
@@ -295,6 +297,9 @@ class Room {
     leave = (room) => {
         this.#mob = null;
         this.#game.player.clear_tools();
+
+        if(this.#game.snapshot_is_on)
+            this.#game.save_snapshot(room);
     }
 
     enter = (room) => {
@@ -315,6 +320,7 @@ class Room {
             this.#game.hud.set_message('         it is very dark!         something wraps around your throat and you start to choke          ');
             this.#game.set_game_over();
         }
+        this.#game.save_player_position();
     }
 
     draw = (ctx, room) => {

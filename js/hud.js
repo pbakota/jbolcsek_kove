@@ -111,6 +111,15 @@ class Hud {
         Object.defineProperty(this, 'active_item', {
             get: () => {
                 return this.#active_item != -1 ? this.#item_slot[this.#active_item] : 'none';
+            },
+            set: (value) => {
+                this.#active_item = this.#item_slot.findIndex(e => e == value);
+            }
+        })
+
+        Object.defineProperty(this, 'slots', {
+            get: () => {
+                return this.#item_slot;
             }
         })
 

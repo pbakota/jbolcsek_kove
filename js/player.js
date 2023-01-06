@@ -132,6 +132,9 @@ class Player {
         Object.defineProperty(this, 'face', {
             get: () => {
                 return this.#face;
+            },
+            set: (value) => {
+                this.#face = value;
             }
         });
 
