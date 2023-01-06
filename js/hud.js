@@ -122,7 +122,7 @@ class Hud {
         this.#can_be_kind = -1;
         this.#can_be_alpha = 0;
 
-        // this.#item_slot[0] = 'flower';
+        // this.#item_slot[0] = 'the_stone';
         // this.#active_item = 0;
 
     }
@@ -301,6 +301,10 @@ class Hud {
             this.#game.rooms.items.remove_item_from_room(this.#game.room, item.index);
             if (/_key$/.test(item.name)) {
                 this.#message = 'key';
+            } else if(item.name == 'the_stone') {
+                this.#message = '         the stone!';
+                this.#active_item = slot;
+                this.#game.set_game_success();
             } else {
                 this.#message = item.name;
             }

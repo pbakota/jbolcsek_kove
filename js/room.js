@@ -211,7 +211,11 @@ class Room {
 
     mob_hit = (rect) => {
         if (this.#mob.hit(rect)) {
-            this.#mob = new Mob(this.#game);
+            if(this.#game.room != 8) {
+                this.#mob = new Mob(this.#game);
+            } else {
+                this.#mob = null;
+            }
             this.#game.player.bullet_fired = false;
         }
     }

@@ -4,7 +4,7 @@ class Game
 {
     _engine; _renderer; _loader; _graphics; _input; _scene; _nextScene;
     _titleScene; _actionScene; _current_room; _active_item; _player; _room; _current_house; _hud;
-    _zone; _game_over; _game_cheat_is_on; _cheat_char_index; _cheat_text;
+    _zone; _game_over; _game_cheat_is_on; _cheat_char_index; _cheat_text; _game_success;
 
     constructor() {
 
@@ -102,6 +102,12 @@ class Game
             }
         });
 
+        Object.defineProperty(this, 'is_success', {
+            get: () => {
+                return this._game_success;
+            }
+        });
+
         Object.defineProperty(this, 'cheat_is_on', {
             get: () => {
                 return this._game_cheat_is_on;
@@ -164,6 +170,11 @@ class Game
 
     set_game_over = () => {
         this._game_over = true;
+    }
+
+    set_game_success = () => {
+        this._game_success = true;
+        this.set_game_over();
     }
 
     update = (dt) => {

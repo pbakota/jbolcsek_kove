@@ -24,10 +24,10 @@ class ActionScene extends Scene {
         this._hud = new Hud(this.game);
         this.game.hud = this._hud;
 
-        // this._game.room = 17; // start in this room
-        this._game.room = 20; // start in this room
-        // this._player.x = 148;
-        this._player.x = 48;
+        this._game.room = 17; // start in this room
+        // this._game.room = 0; // start in this room
+        this._player.x = 148;
+        // this._player.x = 48;
         this._player.y = 200 - 64 - 16 - 40;
     }
 
@@ -59,7 +59,7 @@ class ActionScene extends Scene {
                 // check locked doors
                 switch (this._game.room) {
                     case 0:
-                        if (door == 'small_purple_house_door') {
+                        if (door == 'purple_house_door') {
                             if (this._game.hud.active_item == 'yellow_key') {
                                 this._room.flags[door] = !this._room.flags[door];
                             } else {
@@ -229,11 +229,11 @@ class ActionScene extends Scene {
         this._hud.draw(ctx);
 
         if (this._initial) {
-            this._font.print(ctx, ~~((320 - 14 * 8) / 2), 8, 'STONE OF SAGES');
-            this._font.print(ctx, ~~((320 - 36 * 8) / 2), 16 + 8, 'ORIGINAL PLUS/4 GAME BY MIKLOS TIHOR');
-            this._font.print(ctx, ~~((320 - 31 * 8) / 2), 16 + 24, 'JAVASCRIPT PORT BY PETER BAKOTA');
+            this._font.print(ctx, ~~((320 - 14 * 8) / 2), 8, 'stone of sages');
+            this._font.print(ctx, ~~((320 - 36 * 8) / 2), 16 + 8, 'original plus/4 game by miklos tihor');
+            this._font.print(ctx, ~~((320 - 31 * 8) / 2), 16 + 24, 'javascript port by peter bakota');
 
-            this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO START');
+            this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'press /enter/ to start');
         } else {
             // for debugging
             // this._game.zone.debug(ctx);
@@ -250,8 +250,13 @@ class ActionScene extends Scene {
         this._font.print(ctx, 0, 200 - 64, `${this._game.room}`);
 
         if (this._game.is_over) {
-            this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8) / 2 + 0.5), 'THE GAME IS OVER');
-            this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'PRESS /ENTER/ TO RESTART');
+            if(this._game.is_success) {
+                this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8 - 16) / 2 + 0.5), 'congratulations!');
+                this._font.print(ctx, ~~((320 - 31 * 8) / 2 + 0.5), ~~((200 - 64 - 8 + 16) / 2 + 0.5), 'you have completed the mission!');
+            } else {
+            this._font.print(ctx, ~~((320 - 16 * 8) / 2 + 0.5), ~~((200 - 64 - 8) / 2 + 0.5), 'the game is over');
+            }
+            this._font.print(ctx, ~~((320 - 22 * 8) / 2), 16 + 112 - 4, 'press /enter/ to restart');
         }
     };
 }
