@@ -1,2 +1,4 @@
 - kereszt ?
 - mob eltalal, vege a jateknak
+- uzenet amikor a jatekos gyoz.
+- letramaszo mob 8. szoba

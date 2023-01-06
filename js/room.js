@@ -279,7 +279,7 @@ class Room {
 
         if (this.#mob) {
             this.#mob.update(dt);
-            if (this.#mob.x < -8 || this.#mob.x > 320)
+            if ((this.#mob.x < -8 || this.#mob.x > 320) || (this.#mob.y < -8 || this.#mob.y > 200))
                 this.#mob = new Mob(this.#game);
         }
     }

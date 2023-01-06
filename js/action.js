@@ -24,11 +24,10 @@ class ActionScene extends Scene {
         this._hud = new Hud(this.game);
         this.game.hud = this._hud;
 
-        this._game.room = 17; // start in this room
-        // this._game.room = 38; // start in this room
-        this._player.x = 148;
-        // this._player.x = 200;
-        // this._player.x = 300;
+        // this._game.room = 17; // start in this room
+        this._game.room = 20; // start in this room
+        // this._player.x = 148;
+        this._player.x = 48;
         this._player.y = 200 - 64 - 16 - 40;
     }
 

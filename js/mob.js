@@ -17,6 +17,7 @@ class Mob
     #x;
     #y;
     #vx;
+    #vy;
     #visible;
     #visible_delay;
 
@@ -60,30 +61,39 @@ class Mob
     update = (dt) => {
         this.#mob_timer += dt;
         if (this.#mob_timer < this.#visible_delay) {
-            if (this.#player.x <= 320 / 4 || this.#player.x >= 320 - (320 / 4)) {
-                // The player is on the screen side
-                this.#x = 160 + (Math.random() * 80) - 40;
+            if (this.#game.room == 8) {
+                this.#x = 48;
+                this.#y = 200 - 64 - 16 - 40 + 8;
+                this.#vx = 0;
+                this.#vy = 1;
             } else {
-                if (this.#player.x < 160) {
-                    this.#x = 320 - (Math.random() * 80);
+                if (this.#player.x <= 320 / 4 || this.#player.x >= 320 - (320 / 4)) {
+                    // The player is on the screen side
+                    this.#x = 160 + (Math.random() * 80) - 40;
                 } else {
-                    this.#x = Math.random() * 80;
+                    if (this.#player.x < 160) {
+                        this.#x = 320 - (Math.random() * 80);
+                    } else {
+                        this.#x = Math.random() * 80;
+                    }
                 }
+                this.#y = 200 - 64 - 16 - 40 + 8;
+                this.#vx = (this.#player.x < this.#x) ? -1 : 1;
+                this.#vy = 0;
             }
-            this.#y = 200 - 64 - 16 - 40 + 8;
-            this.#vx = (this.#player.x < this.#x) ? -1 : 1;
         } else if(this.#mob_timer >= this.#visible_delay && this.#mob_timer <= this.#visible_delay + 0.1) {
             this.#visible = true;
-        } else if (this.#mob_timer >= 0.5 && this.#mob_timer <= 1.0) {
+        } else if (this.#mob_timer >= 0.2 && this.#mob_timer <= 0.8) {
             this.#delay += dt;
-            if (this.#delay > 0.05) {
+            if (this.#delay > 0.02) {
                 this.#delay = 0;
                 if (this.#mob_frame < 3)
                     this.#mob_frame ++;
             }
         } else if (this.#mob_timer >= 1.0) {
             if (this.#mob_frame == 3) {
-                this.#x += this.#vx* 400 * dt;
+                this.#x += this.#vx * 150 * dt;
+                this.#y += this.#vy * 150 * dt;
             }
         }
     }
