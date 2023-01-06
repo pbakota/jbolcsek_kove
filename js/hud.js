@@ -131,7 +131,7 @@ class Hud {
         this.#can_be_kind = -1;
         this.#can_be_alpha = 0;
 
-        // this.#item_slot[0] = 'the_stone';
+        // this.#item_slot[0] = 'lamp';
         // this.#active_item = 0;
 
     }

@@ -353,7 +353,7 @@ var Rooms = [
     // room 25
     {
         back: 'water',
-        floor: 'water',
+        floor: 'none',
         details: [
             {
                 x: 0, y: 0,
@@ -365,21 +365,21 @@ var Rooms = [
     // room 26
     {
         back: 'water',
-        floor: 'water',
+        floor: 'none',
         details: [],
         items: []
     },
     // room 27
     {
         back: 'water',
-        floor: 'water',
+        floor: 'none',
         details: [],
         items: []
     },
     // room 28
     {
         back: 'water',
-        floor: 'water',
+        floor: 'none',
         details: [
             {
                 x: 320 - 24, y: 0,

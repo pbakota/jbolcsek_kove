@@ -305,7 +305,7 @@ class Player {
     hit_by_mob = (mob) => {
         if(!this.#game.cheat_is_on && mob.hit({x: this.#x, y: this.#y, w: 16, h: 40 })) {
             // hit by mob
-            this.#game.hud.set_message('         you have been hit by a monster');
+            this.#game.hud.set_message('         you have been bitten by the creature');
             this.#face = Player.FACE_DEAD;
             this.#x = this.#x - 20;
             this.#y = 200-64-16-8;
@@ -697,6 +697,33 @@ class Player {
     };
 
     bird_form_update = (dt) => {
+        if(!this.#game.cheat_is_on) {
+            var back = this.#game.rooms.get(this.#game.room).back;
+            if(back == 'water' && this.#game.house == 'none') {
+                this.#oxygen_timer += dt;
+                if(this.#oxygen_timer > 1) {
+                    this.#oxygen_timer = 0;
+                    this.#oxygen --;
+
+                    if(this.#oxygen == 0) {
+                        this.#face = Player.FACE_DEAD;
+                        this.#x = this.#x - 20;
+                        this.#y = 200-64-16-8;
+                        this.#game.hud.set_message('         out of oxygen! you have drown');
+                        this.#game.set_game_over();
+                        return;
+                    }
+                }
+            } else if(back == 'lava') {
+                this.#face = Player.FACE_DEAD;
+                this.#x = this.#x - 20;
+                this.#y = 200-64-16-8;
+                this.#game.hud.set_message('         you have burned in the lava');
+                this.#game.set_game_over();
+                return;
+            }
+        }
+
         this.#anim_speed += dt;
         if (this.#anim_speed > 0.2) {
             this.#anim_speed = 0;

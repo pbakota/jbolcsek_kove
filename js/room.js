@@ -62,6 +62,9 @@ class Room {
     #buddy;
     #bed;
 
+    #background_cache;
+    #background_cache_ready;
+
     #water_0;
     #water_1;
     #water_2;
@@ -88,6 +91,11 @@ class Room {
         this.#graphics = this.#game.graphics;
 
         this.#items = new ItemManager(this.#game);
+
+        // to cache the rendered background
+        this.#background_cache = this.#game.renderer.backbuffer.cloneNode(true);
+        this.#background_cache_ready = false;
+
 
         this.#air = new Sprite(this.#graphics, 16 * 0, 0, 16, 16);
         this.#water = new Sprite(this.#graphics, 16 * 1, 0, 16, 16);
@@ -213,7 +221,7 @@ class Room {
 
     mob_hit = (rect) => {
         if (this.#mob.hit(rect)) {
-            if(this.#game.room != 8) {
+            if (this.#game.room != 8) {
                 this.#mob = new Mob(this.#game);
             } else {
                 this.#mob = null;
@@ -228,8 +236,8 @@ class Room {
 
     remove_detail = (room, obj) => {
         var index = Rooms[room].details.findIndex(e => e.obj == obj);
-        if(index >= 0) {
-            Rooms[room].details.splice(index,1);
+        if (index >= 0) {
+            Rooms[room].details.splice(index, 1);
         }
     }
 
@@ -301,7 +309,7 @@ class Room {
         this.#mob = null;
         this.#game.player.clear_tools();
 
-        if(this.#game.snapshot_is_on)
+        if (this.#game.snapshot_is_on)
             this.#game.save_snapshot(room);
     }
 
@@ -324,6 +332,7 @@ class Room {
             this.#game.set_game_over();
         }
         this.#game.save_player_position();
+        this.#background_cache_ready = false;
     }
 
     draw = (ctx, room) => {
@@ -333,12 +342,18 @@ class Room {
 
         } else {
 
-            // back
-            var back = this.#get_tile(Rooms[room].back);
-            for (var j = 0; j < 25; ++j) {
-                for (var i = 0; i < 40; ++i) {
-                    back.draw(ctx, i * 8, j * 8);
+            if (this.#background_cache_ready) {
+                ctx.drawImage(this.#background_cache, 0, 0);
+            } else {
+                // back
+                var back = this.#get_tile(Rooms[room].back);
+                for (var j = 0; j < 17; ++j) {
+                    for (var i = 0; i < 40; ++i) {
+                        back.draw(ctx, i * 8, j * 8);
+                    }
                 }
+                this.#background_cache.getContext("2d", { alpha: false }).drawImage(this.#game.renderer.backbuffer, 0, 0);
+                this.#background_cache_ready = true;
             }
 
             // room animations

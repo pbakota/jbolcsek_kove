@@ -26,6 +26,12 @@ class Game
         console.log('Loading assets.');
         this._loader.load('graphics', 'assets/bolcsek_kove.png');
 
+        Object.defineProperty(this, 'renderer', {
+            get: () => {
+                return this._renderer;
+            }
+        });
+
         Object.defineProperty(this, 'graphics', {
             get: () => {
                 return this._graphics;

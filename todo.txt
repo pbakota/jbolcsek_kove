@@ -1,1 +1,3 @@
 - kereszt ?
+- rendering optimizations (cache the background)
+

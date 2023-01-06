@@ -77,6 +77,12 @@ class Renderer
             }
         });
 
+        Object.defineProperty(this, 'backbuffer', {
+            get: () => {
+                return this._bcanvas;
+            }
+        });
+
         Object.defineProperty(this, 'delta', {
             get: () => {
                 return this._delta;
@@ -162,9 +168,11 @@ class Engine
 
     draw = () => {
         if (this._loaded) {
+            // var ts = window.performance.now();
             this._renderer.clear();
             this._game.draw(this._renderer.ctx);
             this._renderer.flip();
+            // console.log(window.performance.now() - ts);
         }
     };
 
