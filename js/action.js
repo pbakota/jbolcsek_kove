@@ -56,68 +56,73 @@ class ActionScene extends Scene {
                 // Toggle 'doors'
 
                 const door = zones.find(value => /door$/.test(value));
-                // check locked doors
-                switch (this._game.room) {
-                    case 0:
-                        if (door == 'purple_house_door') {
-                            if (this._game.hud.active_item == 'yellow_key') {
-                                this._room.flags[door] = !this._room.flags[door];
-                            } else {
-                                this._game.hud.set_message('         the door is locked');
+
+                if (this._game.all_keys_is_on) {
+                    this._room.flags[door] = !this._room.flags[door];
+                } else {
+                    // check locked doors
+                    switch (this._game.room) {
+                        case 0:
+                            if (door == 'purple_house_door') {
+                                if (this._game.hud.active_item == 'yellow_key') {
+                                    this._room.flags[door] = !this._room.flags[door];
+                                } else {
+                                    this._game.hud.set_message('         the door is locked');
+                                }
                             }
-                        }
-                        break;
-                    case 19:
-                        if (door == 'small_purple_house_door') {
-                            if (this._game.hud.active_item == 'brown_key') {
-                                this._room.flags[door] = !this._room.flags[door];
+                            break;
+                        case 19:
+                            if (door == 'small_purple_house_door') {
+                                if (this._game.hud.active_item == 'brown_key') {
+                                    this._room.flags[door] = !this._room.flags[door];
+                                } else {
+                                    this._game.hud.set_message('         the door is locked');
+                                }
                             } else {
-                                this._game.hud.set_message('         the door is locked');
+                                this._room.flags[door] = !this._room.flags[door];
                             }
-                        } else {
+                            break;
+                        case 38:
+                            if (door == 'purple_house_door') {
+                                if (this._game.hud.active_item == 'purple_key') {
+                                    this._room.flags[door] = !this._room.flags[door];
+                                } else {
+                                    this._game.hud.set_message('         the door is locked');
+                                }
+                            }
+                            break;
+                        case 39:
+                            if (door == 'green_house_door') {
+                                if (this._game.hud.active_item == 'blue_key') {
+                                    this._room.flags[door] = !this._room.flags[door];
+                                } else {
+                                    this._game.hud.set_message('         the door is locked');
+                                }
+                            } else {
+                                this._room.flags[door] = !this._room.flags[door];
+                            }
+                            break;
+                        case 43:
+                            if (door == 'brown_house_door') {
+                                if (this._game.hud.active_item == 'grey_key') {
+                                    this._room.flags[door] = !this._room.flags[door];
+                                } else {
+                                    this._game.hud.set_message('         the door is locked');
+                                }
+                            }
+                            break;
+                        case 61:
+                            if (door == 'green_house_door') {
+                                if (this._game.hud.active_item == 'green_key') {
+                                    this._room.flags[door] = !this._room.flags[door];
+                                } else {
+                                    this._game.hud.set_message('         the door is locked');
+                                }
+                            }
+                            break;
+                        default:
                             this._room.flags[door] = !this._room.flags[door];
-                        }
-                        break;
-                    case 38:
-                        if (door == 'purple_house_door') {
-                            if (this._game.hud.active_item == 'purple_key') {
-                                this._room.flags[door] = !this._room.flags[door];
-                            } else {
-                                this._game.hud.set_message('         the door is locked');
-                            }
-                        }
-                        break;
-                    case 39:
-                        if (door == 'green_house_door') {
-                            if (this._game.hud.active_item == 'blue_key') {
-                                this._room.flags[door] = !this._room.flags[door];
-                            } else {
-                                this._game.hud.set_message('         the door is locked');
-                            }
-                        } else {
-                            this._room.flags[door] = !this._room.flags[door];
-                        }
-                        break;
-                    case 43:
-                        if (door == 'brown_house_door') {
-                            if (this._game.hud.active_item == 'grey_key') {
-                                this._room.flags[door] = !this._room.flags[door];
-                            } else {
-                                this._game.hud.set_message('         the door is locked');
-                            }
-                        }
-                        break;
-                    case 61:
-                        if (door == 'green_house_door') {
-                            if (this._game.hud.active_item == 'green_key') {
-                                this._room.flags[door] = !this._room.flags[door];
-                            } else {
-                                this._game.hud.set_message('         the door is locked');
-                            }
-                        }
-                        break;
-                    default:
-                        this._room.flags[door] = !this._room.flags[door];
+                    }
                 }
 
                 if (this._room.flags[door]) {

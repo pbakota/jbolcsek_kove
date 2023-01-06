@@ -6,6 +6,7 @@ class Game
     _titleScene; _actionScene; _current_room; _active_item; _player; _room; _current_house; _hud;
     _zone; _game_over; _game_cheat_is_on; _cheat_char_index; _cheat_text; _game_success;
     _snapshot_char_index; _snapshot_text; _snapshot; _player_start_x; _player_start_y; _player_face;
+    _all_keys_char_index; _all_keys_text; _game_all_keys_is_on;
 
     constructor() {
 
@@ -121,6 +122,12 @@ class Game
             }
         });
 
+        Object.defineProperty(this, 'all_keys_is_on', {
+            get: () => {
+                return this._game_all_keys_is_on;
+            }
+        });
+
         this._cheat_char_index = 0;
         this._cheat_text = [
             'KeyA',
@@ -148,8 +155,20 @@ class Game
             'KeyT'
         ];
 
+        this._all_keys_char_index = 0;
+        this._all_keys_text = [
+            'KeyA',
+            'KeyL',
+            'KeyL',
+            'KeyK',
+            'KeyE',
+            'KeyY',
+            'KeyS'
+        ];
+
         this._game_snapshot_is_on = false;
         this._game_cheat_is_on = false;
+        this._game_all_keys_is_on = false;
         this._current_house = 'none';
 
         this._snapshot = {};
@@ -225,6 +244,13 @@ class Game
                 if(this._snapshot_char_index == this._snapshot_text.length) {
                     this._game_snapshot_is_on = true;
                     console.log('snapshots are enabled');
+                }
+            }
+            if(c == this._all_keys_text[this._all_keys_char_index]) {
+                this._all_keys_char_index ++;
+                if(this._all_keys_char_index == this._all_keys_text.length) {
+                    this._game_all_keys_is_on = true;
+                    console.log('all doors are unlocked');
                 }
             }
         }
