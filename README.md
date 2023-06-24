@@ -12,6 +12,12 @@ This is a javascript port of the old Commodore +4 game called ["A Bölcsek köve
 
 The game does not use any 3rd party tool or engine. Everything was made from scratch with plain Javascript and canvas.
 
+### How to operate in the game
+
+Use cursor keys to navigate the hero. Use the space bar key and cursor up to open/close doors. Use the space bar key and cursor down to operate with commands.
+To navigate the command, use the cursor up or cursor down, and press space to select the command. Use the cursor left and cursor right to navigate
+items selector or morph to selected life form.
+
 Valuable links:
 
 * [Plus4world](http://plus4world.powweb.com)
