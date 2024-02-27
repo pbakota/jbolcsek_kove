@@ -1,5 +1,7 @@
 ### Javascript port of Commodore +4 game called "A Bölcsek köve"
 
+Play the game online: https://pbakota.github.io/jbolcsek_kove/
+
 This is a javascript port of the old Commodore +4 game called ["A Bölcsek köve"](http://plus4world.powweb.com/software/Bolcsek_Kove), in translation "Stone of sages". The original game was written by [Miklós Tihor](http://plus4world.powweb.com/members/Miklos_Tihor), who has besides this masterpiece other interesting games as well. I tried to reproduce the gameplay very closely to the original; there are only some minor differences (I hope so :)). The game itself is an RPG genre game from the old days. Short prolog from the plus4world site:
 
 > Humanity needs the Stone of Sages back from where it has been hidden in ancient times, in order to defeat Zaarlo and give a cut to his domination over the world. To
